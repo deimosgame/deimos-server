@@ -61,14 +61,14 @@ func loadConfig() {
 	for i := 0; i < reflectedCfg.NumField(); i++ {
 		field := reflectedCfg.Field(i)
 		fieldName := normalizeName(reflectedDefCfg.Type().Field(i).Name)
-		fieldValue := field.Interface()
+		fieldValue := reflectedDefCfg.Field(i).Interface()
 		val := fieldValue
 
 		switch reflect.TypeOf(fieldValue).String() {
 		// Easier type checking (especially for non-primitive types) using string conversion
 		case "string":
 			val, err := cfg.GetString("default", fieldName)
-			if err == nil && val != "" {
+			if err == nil {
 				fieldValue = val
 			}
 			field.Set(reflect.ValueOf(fieldValue.(string)))
