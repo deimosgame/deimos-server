@@ -7,8 +7,6 @@ import (
 	"net/http"
 )
 
-var ()
-
 func ResolveIP(masterServer string) net.IP {
 	url := masterServer + "/ip"
 
