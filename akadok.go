@@ -6,7 +6,6 @@ import (
 )
 
 const (
-	configFile        = "server.cfg"
 	masterServer      = "https://akadok.deimos-ga.me"
 	heartbeatInterval = 15 * time.Second
 )
@@ -14,6 +13,7 @@ const (
 var (
 	config           *akadokConfig
 	log              *util.Logger
+	configFile       = "server.cfg"
 	masterServerLost = false
 
 	// Game-related variables

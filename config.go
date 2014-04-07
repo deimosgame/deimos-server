@@ -38,10 +38,16 @@ type akadokConfig struct {
 
 // loadConfig tries to load config from the disk or creates it if necessary
 func loadConfig() {
+	// Check for config file replacement in command line parameters
+	args := os.Args
+	if len(args) > 1 {
+		configFile = os.Args[1]
+	}
+
 	// First check for config file existence
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		// Default config creation
-		fmt.Println("Default config not found. Creating the default file.")
+		fmt.Println("Config file not found. Creating the default file.")
 		writeDefaultConfig()
 	} else if err != nil {
 		panic("Error accessing configuration file. Try changing permissions!")
