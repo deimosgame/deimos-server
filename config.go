@@ -49,7 +49,7 @@ func loadConfig() {
 
 	cfg, err := conf.ReadConfigFile("server.cfg")
 	if err != nil {
-		fmt.Println("Config error")
+		panic("Config error!")
 	}
 	config = new(akadokConfig)
 

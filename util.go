@@ -8,17 +8,18 @@ import (
 
 // resolveIP uses the util package to resolve server external IP address
 func resolveIP() {
-	if config.Host == nil {
-		log.Debug("Resolving external IP address...")
-		ip := util.ResolveIP(masterServer)
-		if ip != nil {
-			config.Host = ip
-		} else {
-			log.Warn("Couldn't resolve external IP address!")
-			config.Host = defaultConfig.Host
-		}
-		log.Debug("Resolved IP address is ", config.Host.String())
+	if config.Host != nil {
+		return
 	}
+	log.Debug("Resolving external IP address...")
+	ip := util.ResolveIP(masterServer)
+	if ip != nil {
+		config.Host = ip
+	} else {
+		log.Warn("Couldn't resolve external IP address!")
+		config.Host = defaultConfig.Host
+	}
+	log.Debug("Resolved IP address is ", config.Host.String())
 }
 
 // heartbeat inits the heartbeat to the master server

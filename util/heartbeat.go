@@ -31,9 +31,11 @@ func Heartbeat(masterServer string, cfg *HeartbeatConfig) (err error) {
 	if err != nil {
 		return err
 	}
+
 	stringResult, err := ioutil.ReadAll(resp.Body)
 	if !strings.Contains(string(stringResult), "true") {
 		return errors.New("Master server gave an unexpected response")
 	}
+
 	return nil
 }
