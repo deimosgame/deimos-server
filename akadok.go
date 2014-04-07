@@ -27,5 +27,13 @@ func main() {
 	log.DebugMode = config.Verbose
 	log.Notice("Akadok is loading...")
 
+	// TODO
+
+	/* Server IP Resolving */
+
+	/* Heartbeat scheduling */
+
+	/* Network routine start */
+
 	log.Notice("Akadok has started")
 }
