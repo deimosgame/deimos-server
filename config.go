@@ -93,11 +93,13 @@ func loadConfig() {
 			}
 		case "net.IP":
 			serializedIP, err := cfg.GetString("default", fieldName)
-			val := net.ParseIP(serializedIP)
-			if err == nil {
-				fieldValue = val
+			var fieldValue net.IP
+			if err != nil || serializedIP == "0.0.0.0" {
+				fieldValue = nil
+			} else {
+				fieldValue = net.ParseIP(serializedIP)
 			}
-			field.Set(reflect.ValueOf(fieldValue.(net.IP)))
+			field.Set(reflect.ValueOf(fieldValue))
 		default:
 			panic("Unknown configuration directive " + fieldName)
 		}
