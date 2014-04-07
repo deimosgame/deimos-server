@@ -1,0 +1,9 @@
+# Akadok default config. Edit as you want!
+name=Akadok Server
+host=0.0.0.0
+port=1518
+maxplayers=16
+maps=map1, map2, map3
+verbose=off
+logfile=server.log
+registerserver=on
