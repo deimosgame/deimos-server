@@ -27,32 +27,42 @@ func heartbeat() {
 		return
 	}
 	go func() {
+		// heartbeatCaller wraps util.Heartbeat with config generation
+		heartbeatCaller := func() {
+			log.Debug("Sending a heartbeat to the master server")
+
+			heartbeatConfig := util.HeartbeatConfig{
+				Ip:         config.Host.String(),
+				Port:       config.Port,
+				Name:       config.Name,
+				PlayedMap:  currentMap,
+				Players:    strings.Join(players, ", "),
+				MaxPlayers: config.MaxPlayers,
+			}
+			err := util.Heartbeat(masterServer, &heartbeatConfig)
+
+			if !masterServerLost && err != nil {
+				log.Warn("Error while sending data to master server!")
+				masterServerLost = true
+			} else if masterServerLost {
+				log.Notice("Regained connection with the master server")
+			}
+		}
+
+		// Produces a heartbeat every so often
 		tickChan := time.Tick(heartbeatInterval)
+
+		heartbeatCaller()
+
 		for {
 			select {
 			case <-tickChan:
-				log.Debug("Sending a heartbeat to the master server")
-
-				heartbeatConfig := util.HeartbeatConfig{
-					Ip:         config.Host.String(),
-					Port:       config.Port,
-					Name:       config.Name,
-					PlayedMap:  currentMap,
-					Players:    strings.Join(players, ", "),
-					MaxPlayers: config.MaxPlayers,
-				}
-				err := util.Heartbeat(masterServer, &heartbeatConfig)
-
-				if !masterServerLost && err != nil {
-					log.Warn("Error while sending data to master server!")
-					masterServerLost = true
-				} else if masterServerLost {
-					log.Notice("Regained connection with the master server")
-				}
+				heartbeatCaller()
+			default:
+				time.Sleep(50 * time.Millisecond)
 			}
 		}
 	}()
-
 }
 
 // initLogging creates the log object and sets its params
