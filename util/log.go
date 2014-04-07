@@ -63,6 +63,7 @@ type Logger struct {
 	stdLogger  *log.Logger
 	errLogger  *log.Logger
 	fileLogger *log.Logger
+	DebugMode  bool
 	ToFile     bool
 }
 
@@ -131,7 +132,9 @@ func (l *Logger) Notice(str ...string) {
 }
 
 func (l *Logger) Debug(str ...string) {
-	l.toStdOut("DEBUG", str...)
+	if l.DebugMode {
+		l.toStdOut("DEBUG", str...)
+	}
 }
 
 // colorSeq generates the coloring string for terminal based on a color int
