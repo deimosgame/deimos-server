@@ -1,17 +1,20 @@
 package main
 
 import (
+	"bitbucket.org/deimosgame/go-akadok/util"
 	"time"
 )
 
 const (
-	configFile   = "server.cfg"
-	masterServer = "https://akadok.deimos-ga.me"
+	configFile        = "server.cfg"
+	masterServer      = "https://akadok.deimos-ga.me"
+	heartbeatInterval = 15 * time.Second
 )
 
 var (
-	config *akadokConfig
-	log    *util.Logger
+	config           *akadokConfig
+	log              *util.Logger
+	masterServerLost = false
 
 	// Game-related variables
 	currentMap string
@@ -19,6 +22,10 @@ var (
 )
 
 func main() {
+	// temp inititalization
+	currentMap = "coolmap"
+	players = []string{"Artemis", "Vomusseind"}
+
 	/* Config loading */
 
 	loadConfig()
