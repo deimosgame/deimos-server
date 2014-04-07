@@ -35,7 +35,16 @@ func InitLogging(logfile string) *Logger {
 	stdLogger := log.New(os.Stdout, "", log.Ltime)
 	errLogger := log.New(os.Stderr, "", log.Ltime)
 
-	file, err := os.Create(logfile)
+	// File opening flags for creation or appending
+	openFlags := os.O_RDWR | os.O_APPEND
+	if _, err := os.Stat(logfile); os.IsNotExist(err) {
+		openFlags = os.O_CREATE
+	} else if err != nil {
+		panic("Error accessing log file!")
+	}
+
+	// Actual file opening
+	file, err := os.OpenFile(logfile, openFlags, 0660)
 	if err != nil {
 		panic("Couldn't write to log file!")
 	}
