@@ -28,8 +28,6 @@ func main() {
 	log.DebugMode = config.Verbose
 	log.Notice("Akadok is loading...")
 
-	// TODO
-
 	/* Server IP Resolving */
 
 	if config.Host == nil {
@@ -43,6 +41,8 @@ func main() {
 		}
 		log.Debug("Resolved IP address is ", config.Host.String())
 	}
+
+	// TODO
 
 	/* Heartbeat scheduling */
 
