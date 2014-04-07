@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	configFile = "server.cfg"
+	configFile   = "server.cfg"
+	masterServer = "https://akadok.deimos-ga.me"
 )
 
 var (
@@ -30,6 +31,18 @@ func main() {
 	// TODO
 
 	/* Server IP Resolving */
+
+	if config.Host == nil {
+		log.Debug("Resolving external IP address...")
+		ip := util.ResolveIP(masterServer)
+		if ip != nil {
+			config.Host = ip
+		} else {
+			log.Warn("Couldn't resolve external IP address!")
+			config.Host = defaultConfig.Host
+		}
+		log.Debug("Resolved IP address is ", config.Host.String())
+	}
 
 	/* Heartbeat scheduling */
 
