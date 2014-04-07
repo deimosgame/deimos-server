@@ -123,6 +123,11 @@ func (l *Logger) Error(str ...string) {
 	l.toStdErr("ERROR", str...)
 }
 
+func (l *Logger) Panic(str ...string) {
+	l.Error(str...)
+	os.Exit(1)
+}
+
 func (l *Logger) Warn(str ...string) {
 	l.toStdErr("WARN", str...)
 }
