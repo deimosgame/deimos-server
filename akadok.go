@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bitbucket.org/deimosgame/go-akadok/util"
+	"time"
 )
 
 const (
@@ -12,6 +12,10 @@ const (
 var (
 	config *akadokConfig
 	log    *util.Logger
+
+	// Game-related variables
+	currentMap string
+	players    []string
 )
 
 func main() {
@@ -21,32 +25,26 @@ func main() {
 
 	/* Logging Engine */
 
-	log = util.InitLogging(config.LogFile)
-	// Log everything to file
-	log.ToFile = true
-	// Change debug mode if needed
-	log.DebugMode = config.Verbose
+	initLogging()
+
 	log.Notice("Akadok is loading...")
 
 	/* Server IP Resolving */
 
-	if config.Host == nil {
-		log.Debug("Resolving external IP address...")
-		ip := util.ResolveIP(masterServer)
-		if ip != nil {
-			config.Host = ip
-		} else {
-			log.Warn("Couldn't resolve external IP address!")
-			config.Host = defaultConfig.Host
-		}
-		log.Debug("Resolved IP address is ", config.Host.String())
-	}
-
-	// TODO
+	resolveIP()
 
 	/* Heartbeat scheduling */
+
+	heartbeat()
+
+	// TODO
 
 	/* Network routine start */
 
 	log.Notice("Akadok has started")
+
+	// Keeps the server idle ATM
+	for {
+		time.Sleep(time.Millisecond * 50)
+	}
 }
