@@ -19,7 +19,7 @@ func resolveIP() {
 		log.Warn("Couldn't resolve external IP address!")
 		config.Host = defaultConfig.Host
 	}
-	log.Debug("Resolved IP address is ", config.Host.String())
+	log.Info("Server IP address is", config.Host.String())
 }
 
 // heartbeat inits the heartbeat to the master server
