@@ -44,9 +44,9 @@ func main() {
 
 	heartbeat()
 
-	// TODO
-
 	/* Network routine start */
+
+	StartServer()
 
 	log.Notice("Akadok has started")
 
