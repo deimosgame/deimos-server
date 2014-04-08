@@ -47,6 +47,7 @@ func heartbeat() {
 				masterServerLost = true
 			} else if masterServerLost {
 				log.Notice("Regained connection with the master server")
+				masterServerLost = false
 			}
 		}
 
