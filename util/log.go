@@ -75,6 +75,7 @@ func Println(out *log.Logger, color string, str ...string) {
 	}
 	for _, v := range str {
 		outBuffer.WriteString(v)
+		outBuffer.WriteString(" ")
 	}
 	if color != "" {
 		outBuffer.WriteString("\033[0m")
