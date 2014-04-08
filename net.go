@@ -7,7 +7,11 @@ import (
 	"time"
 )
 
-func StartServer() {
+func startServer() {
+	go server()
+}
+
+func server() {
 	service := ":" + strconv.Itoa(config.Port)
 	udpAddr, err := net.ResolveUDPAddr("udp4", service)
 	if err != nil {

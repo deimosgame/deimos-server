@@ -46,7 +46,7 @@ func main() {
 
 	/* Network routine start */
 
-	StartServer()
+	startServer()
 
 	log.Notice("Akadok has started")
 
