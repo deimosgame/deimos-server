@@ -10,6 +10,12 @@ The best way to build Akadok for your system is to download the latest version o
 
 Akadok can now be ran using the `go-akadok` command. It will generate its default config file in its directory. You can edit it as you want.
 
+# Testing
+
+Akadok is using multiple sub-packages to make its components modular. However, the standard `go test` command only tests the current package. To run all the test suites of Akadok, this command should be ran in Akadok's root directory:
+
+    go test ./...
+
 # Configuration
 
 In the configuration file (*server.cfg* by default, but this can be customized further by running the command `go-akadok /path/to/config/file.cfg`), the directives follow the format **param = value**. For instance, this is a valid config file that might be used with Akadok:
