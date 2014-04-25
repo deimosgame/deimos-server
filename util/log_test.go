@@ -20,6 +20,13 @@ func TestInitLogging(t *testing.T) {
 }
 
 func TestLogging(t *testing.T) {
+
+	if os.Getenv("WERCKER_STEP_ID") != "" {
+		t.Log("Wercker detected - skipping log file testing")
+		t.Skipped()
+		return
+	}
+
 	// Debug logging test
 	logTest.Debug("This is a debug log test")
 	fi, err := os.Stat(TestLogFile)
