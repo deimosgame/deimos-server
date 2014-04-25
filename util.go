@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// resolveIP uses the util package to resolve server external IP address
+// ResolveIP uses the util package to resolve server external IP address
 func ResolveIP() {
 	if config.Host != nil {
 		return
@@ -22,7 +22,7 @@ func ResolveIP() {
 	log.Info("Server IP address is", config.Host.String())
 }
 
-// heartbeat inits the heartbeat to the master server
+// Heartbeat inits the heartbeat to the master server
 func Heartbeat() {
 	if !config.RegisterServer {
 		return
@@ -74,7 +74,7 @@ func Heartbeat() {
 	}()
 }
 
-// initLogging creates the log object and sets its params
+// InitLogging creates the log object and sets its params
 func InitLogging() {
 	log = util.InitLogging(config.LogFile)
 	// Log everything to file

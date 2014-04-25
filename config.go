@@ -36,7 +36,7 @@ type AkadokConfig struct {
 	RegisterServer bool
 }
 
-// loadConfig tries to load config from the disk or creates it if necessary
+// LoadConfig tries to load config from the disk or creates it if necessary
 func LoadConfig() {
 	// Check for config file replacement in command line parameters
 	args := os.Args
@@ -118,7 +118,7 @@ func LoadConfig() {
 	}
 }
 
-// normalizeName turns an internal config entry name into a better name
+// NormalizeName turns an internal config entry name into a better name
 // for configuration files (UpperCamelCase to lower_snake_case)
 func NormalizeName(name string) string {
 	buf := bytes.NewBuffer(nil)
@@ -136,7 +136,7 @@ func NormalizeName(name string) string {
 	return buf.String()
 }
 
-// writeDefaultConfig generates a clean config file from default options
+// WriteDefaultConfig generates a clean config file from default options
 func WriteDefaultConfig() {
 	cfg := conf.NewConfigFile()
 
