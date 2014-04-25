@@ -118,7 +118,8 @@ func LoadConfig() {
 	}
 }
 
-// normalizeName turns an internal config entry name into a better name for configuration files (UpperCamelCase to lower_snake_case)
+// normalizeName turns an internal config entry name into a better name
+// for configuration files (UpperCamelCase to lower_snake_case)
 func NormalizeName(name string) string {
 	buf := bytes.NewBuffer(nil)
 	for i := 0; i < len(name); i++ {
