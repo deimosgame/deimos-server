@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	defaultConfig = akadokConfig{
+	defaultConfig = AkadokConfig{
 		Name:           "Akadok Server",
 		Host:           net.IPv4(0, 0, 0, 0),
 		Port:           1518,
@@ -25,7 +25,7 @@ var (
 	}
 )
 
-type akadokConfig struct {
+type AkadokConfig struct {
 	Name           string
 	Host           net.IP
 	Port           int
@@ -37,7 +37,7 @@ type akadokConfig struct {
 }
 
 // loadConfig tries to load config from the disk or creates it if necessary
-func loadConfig() {
+func LoadConfig() {
 	// Check for config file replacement in command line parameters
 	args := os.Args
 	if len(args) > 1 {
@@ -48,7 +48,7 @@ func loadConfig() {
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		// Default config creation
 		fmt.Println("Config file not found. Creating the default file.")
-		writeDefaultConfig()
+		WriteDefaultConfig()
 	} else if err != nil {
 		panic("Error accessing configuration file. Try changing permissions!")
 	}
@@ -57,7 +57,7 @@ func loadConfig() {
 	if err != nil {
 		panic("Config error!")
 	}
-	config = new(akadokConfig)
+	config = new(AkadokConfig)
 
 	// Default config reflection to find fields to read
 	reflectedDefCfg := reflect.ValueOf(defaultConfig)
@@ -66,30 +66,34 @@ func loadConfig() {
 
 	for i := 0; i < reflectedCfg.NumField(); i++ {
 		field := reflectedCfg.Field(i)
-		fieldName := normalizeName(reflectedDefCfg.Type().Field(i).Name)
+		fieldName := NormalizeName(reflectedDefCfg.Type().Field(i).Name)
 		fieldValue := reflectedDefCfg.Field(i).Interface()
 		val := fieldValue
 
 		switch reflect.TypeOf(fieldValue).String() {
 		// Easier type checking (especially for non-primitive types) using string conversion
+
 		case "string":
 			val, err := cfg.GetString("default", fieldName)
 			if err == nil {
 				fieldValue = val
 			}
 			field.Set(reflect.ValueOf(fieldValue.(string)))
+
 		case "int":
 			val, err := cfg.GetInt("default", fieldName)
 			if err == nil {
 				fieldValue = val
 			}
 			field.Set(reflect.ValueOf(fieldValue.(int)))
+
 		case "bool":
 			val, err := cfg.GetBool("default", fieldName)
 			if err == nil {
 				fieldValue = val
 			}
 			field.Set(reflect.ValueOf(fieldValue.(bool)))
+
 		case "[]string":
 			serializedString, err := cfg.GetString("default", fieldName)
 			if err == nil {
@@ -97,6 +101,7 @@ func loadConfig() {
 				val = strings.Split(serializedString, ",")
 				field.Set(reflect.ValueOf(val.([]string)))
 			}
+
 		case "net.IP":
 			serializedIP, err := cfg.GetString("default", fieldName)
 			var fieldValue net.IP
@@ -106,6 +111,7 @@ func loadConfig() {
 				fieldValue = net.ParseIP(serializedIP)
 			}
 			field.Set(reflect.ValueOf(fieldValue))
+
 		default:
 			panic("Unknown configuration directive " + fieldName)
 		}
@@ -113,7 +119,7 @@ func loadConfig() {
 }
 
 // normalizeName turns an internal config entry name into a better name for configuration files (UpperCamelCase to lower_snake_case)
-func normalizeName(name string) string {
+func NormalizeName(name string) string {
 	buf := bytes.NewBuffer(nil)
 	for i := 0; i < len(name); i++ {
 		char := string(name[i])
@@ -130,7 +136,7 @@ func normalizeName(name string) string {
 }
 
 // writeDefaultConfig generates a clean config file from default options
-func writeDefaultConfig() {
+func WriteDefaultConfig() {
 	cfg := conf.NewConfigFile()
 
 	// Default config generation by reflection
@@ -163,17 +169,17 @@ func writeDefaultConfig() {
 		}
 	}
 
-	writeBuf := new(configFileCleaner)
+	writeBuf := new(ConfigFileCleaner)
 	cfg.Write(writeBuf, "Akadok default config. Edit as you want!")
 }
 
 // Type to improve config file generation
-type configFileCleaner struct {
+type ConfigFileCleaner struct {
 	w io.Writer
 }
 
 // Write cleans up the file and writes it
-func (w *configFileCleaner) Write(p []byte) (n int, err error) {
+func (w *ConfigFileCleaner) Write(p []byte) (n int, err error) {
 	bufString := string(p)
 	// Small cleaning of the written file to fit our needs
 	bufString = strings.Replace(bufString, "[default]\n", "", 1)

@@ -7,11 +7,12 @@ import (
 	"time"
 )
 
-func startServer() {
-	go server()
+func StartServer() {
+	networkInput := make(chan *World)
+	go Server(networkInput)
 }
 
-func server() {
+func Server(input chan *World) {
 	service := ":" + strconv.Itoa(config.Port)
 	udpAddr, err := net.ResolveUDPAddr("udp4", service)
 	if err != nil {
@@ -24,11 +25,16 @@ func server() {
 	}
 
 	for {
-		handleClient(conn)
+		select {
+		case <-input:
+
+		default:
+			HandleClient(conn)
+		}
 	}
 }
 
-func handleClient(conn *net.UDPConn) {
+func HandleClient(conn *net.UDPConn) {
 
 	var buf [512]byte
 

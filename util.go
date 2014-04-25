@@ -7,12 +7,12 @@ import (
 )
 
 // resolveIP uses the util package to resolve server external IP address
-func resolveIP() {
+func ResolveIP() {
 	if config.Host != nil {
 		return
 	}
 	log.Debug("Resolving external IP address...")
-	ip := util.ResolveIP(masterServer)
+	ip := util.ResolveIP(MasterServer)
 	if ip != nil {
 		config.Host = ip
 	} else {
@@ -23,24 +23,31 @@ func resolveIP() {
 }
 
 // heartbeat inits the heartbeat to the master server
-func heartbeat() {
+func Heartbeat() {
 	if !config.RegisterServer {
 		return
 	}
 	go func() {
 		// heartbeatCaller wraps util.Heartbeat with config generation
-		heartbeatCaller := func() {
+		HeartbeatCaller := func() {
 			log.Debug("Sending a heartbeat to the master server")
+
+			// Generating player list
+			playerList, i := make([]string, len(players)), 0
+			for _, v := range players {
+				playerList[i] = v.Name
+				i++
+			}
 
 			heartbeatConfig := util.HeartbeatConfig{
 				Ip:         config.Host.String(),
 				Port:       config.Port,
 				Name:       config.Name,
 				PlayedMap:  currentMap,
-				Players:    strings.Join(players, ", "),
+				Players:    strings.Join(playerList, ", "),
 				MaxPlayers: config.MaxPlayers,
 			}
-			err := util.Heartbeat(masterServer, &heartbeatConfig)
+			err := util.Heartbeat(MasterServer, &heartbeatConfig)
 
 			if !masterServerLost && err != nil {
 				log.Warn("Error while sending data to master server!")
@@ -52,14 +59,14 @@ func heartbeat() {
 		}
 
 		// Produces a heartbeat every so often
-		tickChan := time.Tick(heartbeatInterval)
+		tickChan := time.Tick(HeartbeatInterval)
 
-		heartbeatCaller()
+		HeartbeatCaller()
 
 		for {
 			select {
 			case <-tickChan:
-				heartbeatCaller()
+				HeartbeatCaller()
 			default:
 				time.Sleep(50 * time.Millisecond)
 			}
@@ -68,7 +75,7 @@ func heartbeat() {
 }
 
 // initLogging creates the log object and sets its params
-func initLogging() {
+func InitLogging() {
 	log = util.InitLogging(config.LogFile)
 	// Log everything to file
 	log.ToFile = true

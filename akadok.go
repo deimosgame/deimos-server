@@ -1,57 +1,63 @@
 package main
 
 import (
+	"bitbucket.org/deimosgame/go-akadok/entity"
 	"bitbucket.org/deimosgame/go-akadok/util"
+	"net"
 	"time"
 )
 
 const (
-	masterServer      = "https://akadok.deimos-ga.me"
-	heartbeatInterval = 15 * time.Second
+	MasterServer      = "https://akadok.deimos-ga.me"
+	HeartbeatInterval = 15 * time.Second
+	BroadcastInterval = 20 * time.Millisecond
 )
 
 var (
-	config           *akadokConfig
+	config           *AkadokConfig
 	log              *util.Logger
 	configFile       = "server.cfg"
 	masterServerLost = false
 
+	networkInput chan *World
+
 	// Game-related variables
 	currentMap string
-	players    []string
+	players    map[*net.UDPAddr]entity.Player
 )
 
 func main() {
 	// temp inititalization
 	currentMap = "coolmap"
-	players = []string{"Artemis", "Vomusseind"}
 
 	/* Config loading */
 
-	loadConfig()
+	LoadConfig()
 
 	/* Logging Engine */
 
-	initLogging()
+	InitLogging()
 
 	log.Notice("Akadok is loading...")
 
 	/* Server IP Resolving */
 
-	resolveIP()
+	ResolveIP()
 
 	/* Heartbeat scheduling */
 
-	heartbeat()
+	Heartbeat()
 
 	/* Network routine start */
 
-	startServer()
+	StartServer()
 
 	log.Notice("Akadok has started")
 
 	// Keeps the server idle ATM
 	for {
+		select {}
+
 		time.Sleep(time.Millisecond * 50)
 	}
 }
