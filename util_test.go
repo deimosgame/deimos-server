@@ -12,5 +12,6 @@ func TestInitLogging(t *testing.T) {
 		t.Log("Error creating the log file")
 		t.Fail()
 	}
-	os.Remove("server.lof")
+	log.Close()
+	os.Remove("server.log")
 }
