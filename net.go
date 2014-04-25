@@ -36,7 +36,7 @@ func Server(input chan *World) {
 
 func HandleClient(conn *net.UDPConn) {
 
-	var buf [512]byte
+	var buf [576]byte
 
 	n, addr, err := conn.ReadFromUDP(buf[0:])
 	if err != nil {
