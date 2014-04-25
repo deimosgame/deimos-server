@@ -1,5 +1,7 @@
 Akadok is the game server for [Deimos](http://deimos-ga.me).
 
+[![wercker status](https://app.wercker.com/status/e7447bbc8dba0abab17c9a30dd64ff05/m/ "wercker status")](https://app.wercker.com/project/bykey/e7447bbc8dba0abab17c9a30dd64ff05)
+
 # Building
 
 The best way to build Akadok for your system is to download the latest version of the [Go](http://golang.org) compiler. Then you just have to run the following commands in a terminal:
