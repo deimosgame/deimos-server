@@ -44,27 +44,29 @@ func InitLogging(logfile string) *Logger {
 	}
 
 	// Actual file opening
-	file, err := os.OpenFile(logfile, openFlags, 0660)
+	fileHandler, err := os.OpenFile(logfile, openFlags, 0660)
 	if err != nil {
 		panic("Couldn't write to log file!")
 	}
-	fileLogger := log.New(file, "", log.LstdFlags)
+	fileLogger := log.New(fileHandler, "", log.LstdFlags)
 
 	return &Logger{
-		stdLogger:  stdLogger,
-		errLogger:  errLogger,
-		fileLogger: fileLogger,
-		ToFile:     false,
+		stdLogger:   stdLogger,
+		errLogger:   errLogger,
+		fileLogger:  fileLogger,
+		fileHandler: fileHandler,
+		ToFile:      false,
 	}
 }
 
 // Logger is a wrap-up type arround standard logger to add stuff like colors
 type Logger struct {
-	stdLogger  *log.Logger
-	errLogger  *log.Logger
-	fileLogger *log.Logger
-	DebugMode  bool
-	ToFile     bool
+	stdLogger   *log.Logger
+	errLogger   *log.Logger
+	fileLogger  *log.Logger
+	fileHandler *os.File
+	DebugMode   bool
+	ToFile      bool
 }
 
 // Println prints the colored version of a string to a logger
@@ -83,11 +85,19 @@ func Println(out *log.Logger, color string, str ...string) {
 	out.Println(outBuffer.String())
 }
 
+func (l *Logger) Close() {
+	l.fileHandler.Close()
+	l.stdLogger = nil
+	l.errLogger = nil
+	l.fileLogger = nil
+}
+
 /**
  *  Custom loggers outputs
  *
  *  Currently ERROR, WARN and NOTICE are logging to stdErr + log file
- *  The others are logged into stdOut, unless user set Logger.ToFile = true
+ *  The others are logged into stdOut, unless user set Logger.ToFile = true then
+ *  they are also logged into the log file
  */
 
 // toStdOut writes a log line to a Logger.stdLogger, and possibly to a file
