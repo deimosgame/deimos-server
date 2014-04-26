@@ -2,6 +2,7 @@ package main
 
 import (
 	"bitbucket.org/deimosgame/go-akadok/util"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -19,7 +20,8 @@ func ResolveIP() {
 		log.Warn("Couldn't resolve external IP address!")
 		config.Host = defaultConfig.Host
 	}
-	log.Info("Server IP address is", config.Host.String())
+	log.Info(fmt.Sprintf("Server IP address is %s:%d", config.Host.String(),
+		config.Port))
 }
 
 // Heartbeat inits the heartbeat to the master server
