@@ -5,6 +5,10 @@ import (
 	"errors"
 )
 
+const (
+	PacketSize = 576
+)
+
 type Packet struct {
 	Id, Index, Total byte
 	Data             []byte
@@ -84,7 +88,7 @@ func (p *Packet) GetField(n int) (*[]byte, error) {
 
 // Encode encodes the packets to a byte array in order to send it on the network
 func (p *Packet) Encode() *[]*[]byte {
-	if len(p.Data) <= 572 {
+	if len(p.Data) <= PacketSize-4 {
 		// Checksum
 		checksum := byte((len(p.Data) + 4) % 256)
 		// Buffer
@@ -98,18 +102,18 @@ func (p *Packet) Encode() *[]*[]byte {
 		return &[]*[]byte{&result}
 	}
 	// Splitted packet
-	packetCount := len(p.Data)/572 + 1
+	packetCount := len(p.Data)/(PacketSize-4) + 1
 	packets := make([]*[]byte, packetCount)
 	for i := 0; i < packetCount; i++ {
-		currentPacketLen := 572
-		if len(p.Data)-i*572 < 572 {
+		currentPacketLen := PacketSize - 4
+		if len(p.Data)-i*(PacketSize-4) < PacketSize-4 {
 			currentPacketLen = len(p.Data)
 		}
 		currentPacket := Packet{
 			Id:    p.Id,
 			Index: byte(i),
 			Total: byte(packetCount),
-			Data:  p.Data[i*572 : currentPacketLen],
+			Data:  p.Data[i*(PacketSize-4) : currentPacketLen],
 		}
 		packets[i] = (*currentPacket.Encode())[0]
 	}
