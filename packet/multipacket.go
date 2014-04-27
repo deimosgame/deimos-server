@@ -2,6 +2,7 @@ package packet
 
 import (
 	"bytes"
+	"errors"
 )
 
 func ReadPacket(receivedPackets ...*[]byte) (*Packet, error) {
@@ -25,4 +26,11 @@ func ReadPacket(receivedPackets ...*[]byte) (*Packet, error) {
 
 func (p *Packet) IsSplitted() bool {
 	return p.Total > 1 || len(p.Data) > 572
+}
+
+func IsSplitted(p *[]byte) (bool, err) {
+	if len(*p) < 4 {
+		return false, errors.New("Invalid packet")
+	}
+	return (*p)[3] > 1, nil
 }
