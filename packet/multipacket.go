@@ -5,7 +5,7 @@ import (
 	"errors"
 )
 
-func ReadPackets(receivedPackets ...*[]byte) (*Packet, error) {
+func ReadPacket(receivedPackets ...*[]byte) (*Packet, error) {
 	decodedPackets := make([]*Packet, len(receivedPackets))
 	// Reorder received packets
 	for _, currentPacket := range receivedPackets {

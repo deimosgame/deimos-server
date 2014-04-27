@@ -18,7 +18,7 @@ func NewPacket(id byte) *Packet {
 }
 
 // ReadPacket reads a byte array contents and tries to parse it as a packet
-func ReadPacket(packetBuffer *[]byte) (*Packet, error) {
+func ReadSinglePacket(packetBuffer *[]byte) (*Packet, error) {
 	if len(*packetBuffer) < 3 {
 		return &Packet{}, errors.New("Invalid packet!")
 	}
