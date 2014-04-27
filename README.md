@@ -17,7 +17,7 @@ Akadok is using multiple sub-packages to make its components modular. However, t
 
     go test ./...
 
-If you just want to measure the stability of Akadok, you can check out our [Wercker project](https://app.wercker.com/project/bykey/e7447bbc8dba0abab17c9a30dd64ff05).
+If you just want to measure the stability of Akadok, you can rather check out our [Wercker project](https://app.wercker.com/project/bykey/e7447bbc8dba0abab17c9a30dd64ff05).
 
 # Configuration
 
@@ -25,7 +25,7 @@ In the configuration file (*server.cfg* by default, but this can be customized f
 
     ; My wonderful config file!
     name = The best server in the world
-    pport = 1337
+    port = 1337
     maxplayers = 42
 
 Here are a list of parameters that may be used in Akadok config files (unknown parameters are ignored by the software):
