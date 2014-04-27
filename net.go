@@ -4,7 +4,6 @@ import (
 	"bitbucket.org/deimosgame/go-akadok/packet"
 	"net"
 	"strconv"
-	"time"
 )
 
 func StartServer() {
@@ -43,13 +42,13 @@ func HandleClient(conn *net.UDPConn) {
 		log.Warn("Had trouble receiving an UDP packet!")
 	}
 
-	packet, err := packet.ReadPacket(buf[:n])
+	packetData := buf[:n]
+	packet, err := packet.ReadPacket(&packetData)
+
 	if err != nil {
 		log.Warn("Corrupted packet received!")
 	}
 	log.Debug(strconv.Itoa(int(packet.Id)), string(packet.Data))
 
-	daytime := time.Now().String()
-
-	conn.WriteToUDP([]byte(daytime), addr)
+	conn.WriteToUDP([]byte("Hello world"), addr)
 }
