@@ -9,7 +9,7 @@ func ReadPacket(receivedPackets ...*[]byte) (*Packet, error) {
 	decodedPackets := make([]*Packet, len(receivedPackets))
 	// Reorder received packets
 	for _, currentPacket := range receivedPackets {
-		decodedPacket, err := ReadPacket(currentPacket)
+		decodedPacket, err := ReadSinglePacket(currentPacket)
 		if err != nil {
 			return nil, err
 		}
