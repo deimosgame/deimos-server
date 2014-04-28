@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 )
 
 const (
@@ -72,14 +73,14 @@ type Logger struct {
 // Println prints the colored version of a string to a logger
 func Println(out *log.Logger, color string, str ...string) {
 	outBuffer := bytes.NewBuffer(nil)
-	if color != "" {
+	if runtime.GOOS != "windows" && color != "" {
 		outBuffer.WriteString(color)
 	}
 	for _, v := range str {
 		outBuffer.WriteString(v)
 		outBuffer.WriteString(" ")
 	}
-	if color != "" {
+	if runtime.GOOS != "windows" && color != "" {
 		outBuffer.WriteString("\033[0m")
 	}
 	out.Println(outBuffer.String())
