@@ -63,7 +63,7 @@ func HandleClient(conn *net.UDPConn) {
 
 		if err != nil {
 			log.Warn("Corrupted packet received!")
-			return
+			continue
 		}
 		log.Debug(strconv.Itoa(int(p.Id)), string(p.Data))
 
@@ -71,13 +71,13 @@ func HandleClient(conn *net.UDPConn) {
 			// TODO: stack splitted packets
 		}
 
-		HandlePacket(addr, p)
+		CheckHandler(addr, p)
 	}
 }
 
 // Handler adds/edits a handler for a given packet type
 // Handlers must have the following prototype:
-// (client *net.UDPAddr, packet *packet.Packet)
+// (h *PacketHandler, packet *packet.Packet)
 func Handle(packetId byte, handler interface{}) {
 	Handlers[packetId] = handler
 }
@@ -91,10 +91,9 @@ func RemoveHandler(packetId byte) bool {
 	return true
 }
 
-func HandlePacket(origin *net.UDPAddr, p *packet.Packet) {
+func CheckHandler(origin *net.UDPAddr, p *packet.Packet) {
 	if handler, ok := Handlers[p.Id]; ok {
-		// Magic happens
-		(handler.(func(*net.UDPAddr, *packet.Packet)))(origin, p)
+		HandlePacket(handler, origin, p)
 	} else {
 		log.Warn("An unknown packet has been received!")
 	}

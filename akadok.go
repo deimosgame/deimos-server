@@ -23,7 +23,7 @@ var (
 
 	// Game-related variables
 	currentMap string
-	players    map[*net.UDPAddr]entity.Player
+	players    map[*net.UDPAddr]*entity.Player
 )
 
 func main() {
