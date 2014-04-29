@@ -88,6 +88,7 @@ func InitLogging() {
 	log.DebugMode = config.Verbose
 }
 
+// CheckToken verifies a token with a user id
 func CheckToken(deimosId, token string) (bool, error) {
 	apiUrl := "https://deimos-ga.me/api/validate-token/"
 	resp, err := http.Get(apiUrl + deimosId + "/" + token)

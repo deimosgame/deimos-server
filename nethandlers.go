@@ -19,7 +19,10 @@ func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
 	(handler.(func(*PacketHandler, *packet.Packet)))(&h, p)
 }
 
-// PacketHandler type for easy network communications in handlers
+/**
+ *  PacketHandler type for easy network communications in handlers
+ */
+
 type PacketHandler struct {
 	Address *net.UDPAddr
 }
