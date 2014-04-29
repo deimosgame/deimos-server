@@ -2,7 +2,10 @@ package main
 
 import (
 	"bitbucket.org/deimosgame/go-akadok/util"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -83,4 +86,25 @@ func InitLogging() {
 	log.ToFile = true
 	// Change debug mode if needed
 	log.DebugMode = config.Verbose
+}
+
+func CheckToken(deimosId, token string) (bool, error) {
+	apiUrl := "https://deimos-ga.me/api/validate-token/"
+	resp, err := http.Get(apiUrl + deimosId + "/" + token)
+	if err != nil {
+		return false, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+	type Answer struct {
+		Success bool
+	}
+	answer := Answer{}
+	err = json.Unmarshal(body, &answer)
+	if err != nil {
+		return false, err
+	}
+	return answer.Success, nil
 }

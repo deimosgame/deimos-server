@@ -14,8 +14,8 @@ type Packet struct {
 	Data             []byte
 }
 
-// NewPacket creates an empty packet with its id
-func NewPacket(id byte) *Packet {
+// New creates an empty packet with its id
+func New(id byte) *Packet {
 	return &Packet{
 		Id: id,
 	}

@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	ProtocolVersion   = byte(1)
 	MasterServer      = "https://akadok.deimos-ga.me"
 	HeartbeatInterval = 15 * time.Second
 	BroadcastInterval = 20 * time.Millisecond

@@ -6,7 +6,7 @@ import (
 )
 
 func TestNewPacket(t *testing.T) {
-	packet := NewPacket(0)
+	packet := New(0)
 	if packet.Id != 0 || !bytes.Equal(packet.Data, []byte{}) {
 		t.Fail()
 	}
@@ -36,7 +36,7 @@ func TestReadPacket(t *testing.T) {
 }
 
 func TestAddField(t *testing.T) {
-	packet := NewPacket(0)
+	packet := New(0)
 	// Add a few bytes
 	b1, b2 := []byte{1, 2, 3}, []byte{4, 5, 6}
 	packet.AddField(&b1)
@@ -52,7 +52,7 @@ func TestAddField(t *testing.T) {
 }
 
 func TestAddFieldBytes(t *testing.T) {
-	packet := NewPacket(0)
+	packet := New(0)
 	// Add a few bytes
 	b1, b2 := []byte{1, 2, 3}, []byte{4, 5, 6}
 	packet.AddFieldBytes(1, 2, 3)
@@ -68,7 +68,7 @@ func TestAddFieldBytes(t *testing.T) {
 }
 
 func TestGetField(t *testing.T) {
-	packet := NewPacket(0)
+	packet := New(0)
 	d := []byte{1, 2, 3}
 	packet.AddField(&d)
 
@@ -87,7 +87,7 @@ func TestGetField(t *testing.T) {
 func TestEncode(t *testing.T) {
 	expectedPacketContents := []byte{11, 0, 0, 0, 1, 2, 3, 0, 4, 5, 6}
 
-	packet := NewPacket(0)
+	packet := New(0)
 	packet.AddFieldBytes(1, 2, 3)
 	packet.AddFieldBytes(4, 5, 6)
 	result := packet.Encode()
