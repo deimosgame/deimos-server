@@ -6,12 +6,23 @@ import (
 	"strconv"
 )
 
+var (
+	Handlers = make(map[byte]interface{})
+)
+
+type OutboundMessage struct {
+	Address *net.UDPAddr
+	Packet  *packet.Packet
+}
+
+// StartServer starts the UDP server in a different goroutine
 func StartServer() {
-	networkInput := make(chan *World)
+	networkInput = make(chan *OutboundMessage)
 	go Server(networkInput)
 }
 
-func Server(input chan *World) {
+// Server is the main function of the server, which mainly handles outbound data
+func Server(input chan *OutboundMessage) {
 	service := ":" + strconv.Itoa(config.Port)
 	udpAddr, err := net.ResolveUDPAddr("udp4", service)
 	if err != nil {
@@ -23,32 +34,68 @@ func Server(input chan *World) {
 		log.Panic("Couldn't bind server to UDP")
 	}
 
+	// Starts the handler for inbound packets
+	go HandleClient(conn)
 	for {
 		select {
-		case <-input:
-
-		default:
-			HandleClient(conn)
+		case m := <-input:
+			encodedPackets := m.Packet.Encode()
+			for _, currentPacket := range *encodedPackets {
+				conn.WriteToUDP(*currentPacket, m.Address)
+			}
 		}
 	}
 }
 
+// HandleClient manages incoming packets and dispatches them to their respective
+// handlers
 func HandleClient(conn *net.UDPConn) {
+	for {
+		var buf [packet.PacketSize]byte
 
-	var buf [packet.PacketSize]byte
+		n, addr, err := conn.ReadFromUDP(buf[0:])
+		if err != nil {
+			log.Warn("Had trouble receiving an UDP packet!")
+		}
 
-	n, addr, err := conn.ReadFromUDP(buf[0:])
-	if err != nil {
-		log.Warn("Had trouble receiving an UDP packet!")
+		packetData := buf[:n]
+		p, err := packet.ReadPacket(&packetData)
+
+		if err != nil {
+			log.Warn("Corrupted packet received!")
+			return
+		}
+		log.Debug(strconv.Itoa(int(p.Id)), string(p.Data))
+
+		if p.IsSplitted() {
+			// TODO: stack splitted packets
+		}
+
+		HandlePacket(addr, p)
 	}
+}
 
-	packetData := buf[:n]
-	packet, err := packet.ReadPacket(&packetData)
+// Handler adds/edits a handler for a given packet type
+// Handlers must have the following prototype:
+// (client *net.UDPAddr, packet *packet.Packet)
+func Handle(packetId byte, handler interface{}) {
+	Handlers[packetId] = handler
+}
 
-	if err != nil {
-		log.Warn("Corrupted packet received!")
+// RemoveHandler deletes a handler from the handler table
+func RemoveHandler(packetId byte) bool {
+	if _, ok := Handlers[packetId]; !ok {
+		return false
 	}
-	log.Debug(strconv.Itoa(int(packet.Id)), string(packet.Data))
+	delete(Handlers, packetId)
+	return true
+}
 
-	conn.WriteToUDP([]byte("Hello world"), addr)
+func HandlePacket(origin *net.UDPAddr, p *packet.Packet) {
+	if handler, ok := Handlers[p.Id]; ok {
+		// Magic happens
+		(handler.(func(*net.UDPAddr, *packet.Packet)))(origin, p)
+	} else {
+		log.Warn("An unknown packet has been received!")
+	}
 }

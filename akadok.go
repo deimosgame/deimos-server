@@ -19,7 +19,7 @@ var (
 	configFile       = "server.cfg"
 	masterServerLost = false
 
-	networkInput chan *World
+	networkInput chan *OutboundMessage
 
 	// Game-related variables
 	currentMap string
@@ -51,6 +51,12 @@ func main() {
 	/* Network routine start */
 
 	StartServer()
+
+	/* Setup handlers for incoming packets */
+
+	SetupHandlers()
+
+	/* Tadaaaa */
 
 	log.Notice("Akadok has started")
 

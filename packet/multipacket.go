@@ -8,16 +8,26 @@ import (
 // ReadPacket arranges and reads multiple packets of the same type at once,
 // resulting in one large packet
 func ReadPacket(receivedPackets ...*[]byte) (*Packet, error) {
-	decodedPackets := make([]*Packet, len(receivedPackets))
+	packetCount := len(receivedPackets)
+
+	if packetCount > 255 {
+		return nil, errors.New("Too many packets!")
+	}
+
+	decodedPackets := make([]*Packet, packetCount)
 	// Reorder received packets
 	for _, currentPacket := range receivedPackets {
 		decodedPacket, err := ReadSinglePacket(currentPacket)
 		if err != nil {
 			return nil, err
 		}
+		if decodedPacket.Index >= byte(packetCount) {
+			return nil, errors.New("Invalid packet index")
+		}
 		decodedPackets[decodedPacket.Index] = decodedPacket
 	}
-	// Put all packets together
+
+	// Put all packets back together
 	dataBuffer := bytes.NewBuffer(nil)
 	for _, currentPacket := range decodedPackets {
 		dataBuffer.Write(currentPacket.Data)
