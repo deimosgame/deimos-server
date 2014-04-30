@@ -10,6 +10,7 @@ import (
 func SetupHandlers() {
 	Handle(0x00, HandleHandshakePacket)
 	Handle(0x01, HandleClientConnectionPacket)
+	Handle(0x02, HandleDisconnectionPacket)
 	Handle(0x03, HandleChatPacket)
 }
 
@@ -112,12 +113,12 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 	currentMapBytes := []byte(currentMap)
 	outPacket.AddField(&currentMapBytes)
 	h.Answer(outPacket)
-	log.Info(newPlayer.Name + "(" + newPlayer.Account + h.Address.IP.String() +
-		") has joined the game!")
+	log.Info(newPlayer.Name + " (" + newPlayer.Account + " - " +
+		h.Address.IP.String() + ") has joined the game!")
 	SendMessage(newPlayer.Name + " has joined the game!")
 }
 
-// HandleDisconnectionPacket handles player disconnections
+// HandleDisconnectionPacket (0x02) handles player disconnections
 func HandleDisconnectionPacket(h *PacketHandler, p *packet.Packet) {
 	// Just remove the player, the GC will do the rest
 	h.Player.Remove()
