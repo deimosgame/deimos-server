@@ -91,11 +91,22 @@ func RemoveHandler(packetId byte) bool {
 	return true
 }
 
+// CheckHandler tries to use a handler for packets
 func CheckHandler(origin *net.UDPAddr, p *packet.Packet) {
 	if handler, ok := Handlers[p.Id]; ok {
 		// Starts a new goroutine for the handler
 		go HandlePacket(handler, origin, p)
 	} else {
 		log.Warn("An unknown packet has been received!")
+	}
+}
+
+// SendMessage messages all players on the server
+func SendMessage(message string) {
+	messagePacket := packet.New(0x03)
+	messageBytes := []byte(message)
+	messagePacket.AddField(&messageBytes)
+	for _, currentPlayer := range players {
+		currentPlayer.Send(messagePacket)
 	}
 }
