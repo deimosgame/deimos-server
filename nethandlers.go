@@ -117,7 +117,15 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 	SendMessage(newPlayer.Name + " has joined the game!")
 }
 
-// PacketChatHandler handles the chat packets
+// HandleDisconnectionPacket handles player disconnections
+func HandleDisconnectionPacket(h *PacketHandler, p *packet.Packet) {
+	// Just remove the player, the GC will do the rest
+	h.Player.Remove()
+	log.Info(h.Player.Name + " has left the server.")
+	SendMessage(h.Player.Name + " has left the server.")
+}
+
+// PacketChatHandler (0x03) handles the chat packets
 func HandleChatPacket(h *PacketHandler, p *packet.Packet) {
 	message, err := p.GetField(0)
 	if err != nil {
