@@ -54,6 +54,7 @@ func (p *Player) Kick(reason string) {
 	reasonBytes := []byte(reason)
 	kickPacket.AddField(&reasonBytes)
 	p.Send(kickPacket)
+	SendMessage(p.Name + " has been kicked!")
 	delete(players, p.Address)
 }
 
