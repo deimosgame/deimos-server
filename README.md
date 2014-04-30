@@ -47,3 +47,12 @@ Here are a list of parameters that may be used in Akadok config files (unknown p
 **log_file**: Changes server's logs location. Default: server.log
 
 **register_server**: Determines wether or not server will try to contact master server in order to be registered on public server list. Default: false
+
+# Server commands
+
+The following commands are available when running your Akadok server:
+
+| Command | Arguments | Effect |
+| ------- | --------- | :----- |
+| kick | <*|player> [reason] | Kicks a player |
+| stop | [reason] | Stops the server |
