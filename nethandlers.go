@@ -93,8 +93,8 @@ func ClientConnection(h *PacketHandler, p *packet.Packet) {
 	}
 	// Create a player
 	newPlayer := Player{
-		AkadokAccount: string(*userId),
-		Address:       h.Address,
+		Account: string(*userId),
+		Address: h.Address,
 	}
 	newPlayer.RefreshName()
 	players[h.Address] = &newPlayer
@@ -103,4 +103,6 @@ func ClientConnection(h *PacketHandler, p *packet.Packet) {
 	currentMapBytes := []byte(currentMap)
 	outPacket.AddField(&currentMapBytes)
 	h.Answer(outPacket)
+	log.Info(newPlayer.Name + "(" + newPlayer.Account +
+		") has joined the game!")
 }
