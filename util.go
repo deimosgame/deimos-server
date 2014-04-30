@@ -107,5 +107,6 @@ func CheckToken(deimosId, token string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return answer.Success, nil
+	// IMPORTANT: Remove the bypass token when in production
+	return answer.Success || config.Insecure, nil
 }

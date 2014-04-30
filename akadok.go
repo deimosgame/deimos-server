@@ -2,7 +2,6 @@ package main
 
 import (
 	"bitbucket.org/deimosgame/go-akadok/util"
-	"net"
 	"os"
 	"time"
 )
@@ -24,7 +23,7 @@ var (
 
 	// Game-related variables
 	currentMap string
-	players    map[*net.UDPAddr]*Player
+	players    = make(map[string]*Player)
 )
 
 func main() {

@@ -15,12 +15,7 @@ func SetupHandlers() {
 }
 
 func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
-	var user *Player
-	user = &Player{}
-	if player, ok := players[addr]; ok {
-		user = player
-	}
-	h := PacketHandler{addr, user}
+	h := PacketHandler{addr}
 	// Magic happens
 	(handler.(func(*PacketHandler, *packet.Packet)))(&h, p)
 }
@@ -31,7 +26,6 @@ func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
 
 type PacketHandler struct {
 	Address *net.UDPAddr
-	Player  *Player
 }
 
 // Answer adds a packet to send to the network queue
@@ -51,7 +45,7 @@ func (h *PacketHandler) Error() {
 
 // GetPlayer allows a handler to easily get a player from its address
 func (h *PacketHandler) GetPlayer() (*Player, error) {
-	player, ok := players[h.Address]
+	player, ok := players[h.Address.String()]
 	if !ok {
 		return nil, errors.New("Unknown player")
 	}
@@ -107,7 +101,7 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 		Address: h.Address,
 	}
 	newPlayer.RefreshName()
-	players[h.Address] = &newPlayer
+	players[h.Address.String()] = &newPlayer
 	// Send authorization packet
 	outPacket.AddFieldBytes(1)
 	currentMapBytes := []byte(currentMap)
@@ -121,17 +115,27 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 // HandleDisconnectionPacket (0x02) handles player disconnections
 func HandleDisconnectionPacket(h *PacketHandler, p *packet.Packet) {
 	// Just remove the player, the GC will do the rest
-	h.Player.Remove()
-	log.Info(h.Player.Name + " has left the server.")
-	SendMessage(h.Player.Name + " has left the server.")
+	player, err := h.GetPlayer()
+	if err != nil {
+		h.Error()
+		return
+	}
+	player.Remove()
+	log.Info(player.Name + " has left the server.")
+	SendMessage(player.Name + " has left the server.")
 }
 
 // PacketChatHandler (0x03) handles the chat packets
 func HandleChatPacket(h *PacketHandler, p *packet.Packet) {
+	player, err := h.GetPlayer()
+	if err != nil {
+		h.Error()
+		return
+	}
 	message, err := p.GetField(0)
 	if err != nil {
 		h.Error()
 		return
 	}
-	SendMessage("<" + h.Player.Name + "> " + string(*message))
+	SendMessage("<" + player.Name + "> " + string(*message))
 }

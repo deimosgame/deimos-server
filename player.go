@@ -84,5 +84,5 @@ func (p *Player) RefreshName() error {
 
 // Remove remove a player form the server
 func (p *Player) Remove() {
-	delete(players, p.Address)
+	delete(players, p.Address.String())
 }

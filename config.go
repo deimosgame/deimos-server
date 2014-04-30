@@ -22,6 +22,7 @@ var (
 		Verbose:        false,
 		LogFile:        "server.log",
 		RegisterServer: true,
+		Insecure:       false,
 	}
 )
 
@@ -34,6 +35,7 @@ type AkadokConfig struct {
 	Verbose        bool
 	LogFile        string
 	RegisterServer bool
+	Insecure       bool
 }
 
 // LoadConfig tries to load config from the disk or creates it if necessary
