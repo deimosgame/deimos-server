@@ -71,6 +71,11 @@ func HandleHandshakePacket(h *PacketHandler, p *packet.Packet) {
 // PacketClientConnectionHandler (0x01). Allows a player to connect if
 // everything is alright
 func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
+	if _, ok := players[h.Address.String()]; ok {
+		// Player is already connected (what a dumbass!)
+		h.Error()
+		return
+	}
 	// Retrive fields for the connection
 	userId, err := p.GetField(0)
 	if err != nil {
