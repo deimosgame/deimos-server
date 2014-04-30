@@ -91,6 +91,14 @@ func ClientConnection(h *PacketHandler, p *packet.Packet) {
 		h.Answer(outPacket)
 		return
 	}
+	// Create a player
+	newPlayer := Player{
+		AkadokAccount: string(*userId),
+		Address:       h.Address,
+	}
+	newPlayer.RefreshName()
+	players[h.Address] = &newPlayer
+	// Send authorization packet
 	outPacket.AddFieldBytes(1)
 	currentMapBytes := []byte(currentMap)
 	outPacket.AddField(&currentMapBytes)
