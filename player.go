@@ -55,7 +55,7 @@ func (p *Player) Kick(reason string) {
 	kickPacket.AddField(&reasonBytes)
 	p.Send(kickPacket)
 	SendMessage(p.Name + " has been kicked!")
-	delete(players, p.Address)
+	p.Remove()
 }
 
 // RefreshName gets the player name from the web
@@ -80,4 +80,9 @@ func (p *Player) RefreshName() error {
 	}
 	p.Name = responseStruct.Name
 	return nil
+}
+
+// Remove remove a player form the server
+func (p *Player) Remove() {
+	delete(players, p.Address)
 }
