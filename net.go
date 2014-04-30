@@ -93,7 +93,8 @@ func RemoveHandler(packetId byte) bool {
 
 func CheckHandler(origin *net.UDPAddr, p *packet.Packet) {
 	if handler, ok := Handlers[p.Id]; ok {
-		HandlePacket(handler, origin, p)
+		// Starts a new goroutine for the handler
+		go HandlePacket(handler, origin, p)
 	} else {
 		log.Warn("An unknown packet has been received!")
 	}

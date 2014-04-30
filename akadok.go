@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bitbucket.org/deimosgame/go-akadok/entity"
 	"bitbucket.org/deimosgame/go-akadok/util"
 	"net"
+	"os"
 	"time"
 )
 
@@ -24,7 +24,7 @@ var (
 
 	// Game-related variables
 	currentMap string
-	players    map[*net.UDPAddr]*entity.Player
+	players    map[*net.UDPAddr]*Player
 )
 
 func main() {
@@ -35,13 +35,17 @@ func main() {
 
 	LoadConfig()
 
-	/* Logging Engine */
+	/* Logging engine */
 
 	InitLogging()
 
 	log.Notice("Akadok is loading...")
 
-	/* Server IP Resolving */
+	/* Commands parsing */
+
+	ParseCommands()
+
+	/* Server IP resolving */
 
 	ResolveIP()
 
@@ -61,10 +65,19 @@ func main() {
 
 	log.Notice("Akadok has started")
 
-	// Keeps the server idle ATM
+	// Keeps the server idle
 	for {
 		select {}
 
 		time.Sleep(time.Millisecond * 50)
 	}
+}
+
+// Stop stops the server gracefully
+func Stop() {
+	log.Info("Stopping the server!")
+	for _, currentPlayer := range players {
+		currentPlayer.Kick("Server is stopping!")
+	}
+	os.Exit(0)
 }

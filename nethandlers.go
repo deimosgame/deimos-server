@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bitbucket.org/deimosgame/go-akadok/entity"
 	"bitbucket.org/deimosgame/go-akadok/packet"
 	"errors"
 	"net"
@@ -43,7 +42,7 @@ func (h *PacketHandler) Error() {
 }
 
 // GetPlayer allows a handler to easily get a player from its address
-func (h *PacketHandler) GetPlayer() (*entity.Player, error) {
+func (h *PacketHandler) GetPlayer() (*Player, error) {
 	player, ok := players[h.Address]
 	if !ok {
 		return nil, errors.New("Unknown player")
@@ -66,8 +65,7 @@ func Handshake(h *PacketHandler, p *packet.Packet) {
 	h.Answer(outPacket)
 }
 
-// ClientConnection (0x01). Starts a goroutine for the connectig player if
-// everything is alright
+// ClientConnection (0x01). Allows a player to connect if everything is alright
 func ClientConnection(h *PacketHandler, p *packet.Packet) {
 	// Retrive fields for the connection
 	userId, err := p.GetField(0)
@@ -93,7 +91,6 @@ func ClientConnection(h *PacketHandler, p *packet.Packet) {
 		h.Answer(outPacket)
 		return
 	}
-	// TODO: Start the player routine
 	outPacket.AddFieldBytes(1)
 	currentMapBytes := []byte(currentMap)
 	outPacket.AddField(&currentMapBytes)
