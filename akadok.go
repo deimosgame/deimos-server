@@ -77,7 +77,7 @@ func main() {
 func Stop(reason string) {
 	if reason == "" {
 		log.Info("Stopping the server!")
-		reason := "Server is stopping!"
+		reason = "Server is stopping!"
 	} else {
 		log.Info("Stopping the server: " + reason)
 	}
