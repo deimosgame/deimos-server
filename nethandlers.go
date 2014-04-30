@@ -8,9 +8,9 @@ import (
 
 // SetupHandlers contains the handlers for each packet ID
 func SetupHandlers() {
-	Handle(0x00, PacketHandshakeHandler)
-	Handle(0x01, PacketClientConnectionHandler)
-	Handle(0x03, PacketChatHandler)
+	Handle(0x00, HandleHandshakePacket)
+	Handle(0x01, HandleClientConnectionPacket)
+	Handle(0x03, HandleChatPacket)
 }
 
 func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
@@ -57,11 +57,11 @@ func (h *PacketHandler) GetPlayer() (*Player, error) {
 }
 
 /**
- *  Various packet handlers
+ *  Various packet handlers (convention: HandleXPacket)
  */
 
-// Handshake (0x00)
-func PacketHandshakeHandler(h *PacketHandler, p *packet.Packet) {
+// PacketHandshakeHandler (0x00)
+func HandleHandshakePacket(h *PacketHandler, p *packet.Packet) {
 	outPacket := packet.New(0)
 	if version, err := p.GetField(0); err != nil ||
 		(*version)[0] != ProtocolVersion {
@@ -72,8 +72,9 @@ func PacketHandshakeHandler(h *PacketHandler, p *packet.Packet) {
 	h.Answer(outPacket)
 }
 
-// ClientConnection (0x01). Allows a player to connect if everything is alright
-func PacketClientConnectionHandler(h *PacketHandler, p *packet.Packet) {
+// PacketClientConnectionHandler (0x01). Allows a player to connect if
+// everything is alright
+func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 	// Retrive fields for the connection
 	userId, err := p.GetField(0)
 	if err != nil {
@@ -115,7 +116,8 @@ func PacketClientConnectionHandler(h *PacketHandler, p *packet.Packet) {
 	SendMessage(newPlayer.Name + " has joined the game!")
 }
 
-func PacketChatHandler(h *PacketHandler, p *packet.Packet) {
+// PacketChatHandler handles the chat packets
+func HandleChatPacket(h *PacketHandler, p *packet.Packet) {
 	message, err := p.GetField(0)
 	if err != nil {
 		h.Error()

@@ -36,7 +36,7 @@ func HandleCommand(command string, args []string) {
 }
 
 /**
- *  Command handlers
+ *  Command handlers (convention)
  */
 
 // HandleKickCommand handles a player kick command
