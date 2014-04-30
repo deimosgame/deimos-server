@@ -57,7 +57,8 @@ func (h *PacketHandler) GetPlayer() (*Player, error) {
 // Handshake (0x00)
 func Handshake(h *PacketHandler, p *packet.Packet) {
 	outPacket := packet.New(0)
-	if version, err := p.GetField(0); err != nil || (*version)[0] != ProtocolVersion {
+	if version, err := p.GetField(0); err != nil ||
+		(*version)[0] != ProtocolVersion {
 		outPacket.AddFieldBytes(0)
 	} else {
 		outPacket.AddFieldBytes(ProtocolVersion)
@@ -103,6 +104,7 @@ func ClientConnection(h *PacketHandler, p *packet.Packet) {
 	currentMapBytes := []byte(currentMap)
 	outPacket.AddField(&currentMapBytes)
 	h.Answer(outPacket)
-	log.Info(newPlayer.Name + "(" + newPlayer.Account +
+	log.Info(newPlayer.Name + "(" + newPlayer.Account + h.Address.IP.String() +
 		") has joined the game!")
+	SendMessage(newPlayer.Name + " has joined the game!")
 }
