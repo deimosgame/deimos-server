@@ -14,8 +14,8 @@ func SetupHandlers() {
 }
 
 func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
-	var user Player
-	user = nil
+	var user *Player
+	user = &Player{}
 	if player, ok := players[addr]; ok {
 		user = player
 	}
