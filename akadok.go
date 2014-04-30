@@ -74,10 +74,15 @@ func main() {
 }
 
 // Stop stops the server gracefully
-func Stop() {
-	log.Info("Stopping the server!")
+func Stop(reason string) {
+	if reason == "" {
+		log.Info("Stopping the server!")
+		reason := "Server is stopping!"
+	} else {
+		log.Info("Stopping the server: " + reason)
+	}
 	for _, currentPlayer := range players {
-		currentPlayer.Kick("Server is stopping!")
+		currentPlayer.Kick(reason)
 	}
 	os.Exit(0)
 }

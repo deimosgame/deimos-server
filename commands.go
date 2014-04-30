@@ -29,14 +29,15 @@ func Parser() {
 func HandleCommand(command string, args []string) {
 	switch command {
 	case "stop":
-		Stop()
+		HandleStopCommand(args)
 	case "kick":
-		Kick(args)
+		HandleKickCommand(args)
 	}
 }
 
-// Kick handles a player kick command
-func Kick(args []string) {
+// HandleKickCommand handles a player kick command
+// Usage: kick <*|player> [reason]
+func HandleKickCommand(args []string) {
 	if len(args) == 0 {
 		log.Info("kick: Kicks a player from the server")
 		log.Info("	Usage: kick <*|player> [reason]")
@@ -59,4 +60,20 @@ func Kick(args []string) {
 			log.Info("Kicked " + currentPlayer.Name)
 		}
 	}
+}
+
+// HandleStopCommand handles the stop commands and its arguments
+// Usage: stop [reason]
+func HandleStopCommand(args []string) {
+	reason := ""
+	if len(args) > 0 {
+		for i, reasonWord := range args {
+			if i == 0 {
+				continue
+			}
+			reason += reasonWord
+		}
+	}
+
+	Stop(reason)
 }
