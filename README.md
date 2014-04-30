@@ -54,5 +54,5 @@ The following commands are available when running your Akadok server:
 
 | Command | Arguments | Effect |
 | ------- | --------- | :----- |
-| kick | <*|player> [reason] | Kicks a player |
+| kick | <* OR player> [reason] | Kicks a player |
 | stop | [reason] | Stops the server |
