@@ -35,6 +35,10 @@ func HandleCommand(command string, args []string) {
 	}
 }
 
+/**
+ *  Command handlers
+ */
+
 // HandleKickCommand handles a player kick command
 // Usage: kick <*|player> [reason]
 func HandleKickCommand(args []string) {

@@ -65,7 +65,8 @@ func main() {
 
 	log.Notice("Akadok has started")
 
-	// Keeps the server idle
+	// Keeps the main process idle
+	//
 	for {
 		select {}
 

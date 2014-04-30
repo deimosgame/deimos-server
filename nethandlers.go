@@ -8,12 +8,17 @@ import (
 
 // SetupHandlers contains the handlers for each packet ID
 func SetupHandlers() {
-	Handle(0x00, Handshake)
-	Handle(0x01, ClientConnection)
+	Handle(0x00, PacketHandshakeHandler)
+	Handle(0x01, PacketClientConnectionHandler)
+	Handle(0x03, PacketChatHandler)
 }
 
 func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
-	h := PacketHandler{addr}
+	user := nil
+	if player, ok := players[addr]; ok {
+		user = player
+	}
+	h := PacketHandler{addr, user}
 	// Magic happens
 	(handler.(func(*PacketHandler, *packet.Packet)))(&h, p)
 }
@@ -24,6 +29,7 @@ func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
 
 type PacketHandler struct {
 	Address *net.UDPAddr
+	Player  *Player
 }
 
 // Answer adds a packet to send to the network queue
@@ -55,7 +61,7 @@ func (h *PacketHandler) GetPlayer() (*Player, error) {
  */
 
 // Handshake (0x00)
-func Handshake(h *PacketHandler, p *packet.Packet) {
+func PacketHandshakeHandler(h *PacketHandler, p *packet.Packet) {
 	outPacket := packet.New(0)
 	if version, err := p.GetField(0); err != nil ||
 		(*version)[0] != ProtocolVersion {
@@ -67,7 +73,7 @@ func Handshake(h *PacketHandler, p *packet.Packet) {
 }
 
 // ClientConnection (0x01). Allows a player to connect if everything is alright
-func ClientConnection(h *PacketHandler, p *packet.Packet) {
+func PacketClientConnectionHandler(h *PacketHandler, p *packet.Packet) {
 	// Retrive fields for the connection
 	userId, err := p.GetField(0)
 	if err != nil {
@@ -85,7 +91,7 @@ func ClientConnection(h *PacketHandler, p *packet.Packet) {
 		h.Error()
 		return
 	}
-	outPacket := packet.New(1)
+	outPacket := packet.New(0x01)
 	if !validToken {
 		// 0 for denied connection
 		outPacket.AddFieldBytes(0)
@@ -107,4 +113,13 @@ func ClientConnection(h *PacketHandler, p *packet.Packet) {
 	log.Info(newPlayer.Name + "(" + newPlayer.Account + h.Address.IP.String() +
 		") has joined the game!")
 	SendMessage(newPlayer.Name + " has joined the game!")
+}
+
+func PacketChatHandler(h *PacketHandler, p *packet.Packet) {
+	message, err := p.GetField(0)
+	if err != nil {
+		h.Error()
+		return
+	}
+	SendMessage("<" + h.Player.Name + "> " + string(*message))
 }
