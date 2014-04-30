@@ -37,6 +37,14 @@ func (p *Player) Match(name string) bool {
 	return p.Name[:len(name)] == name || name == "*"
 }
 
+func (p *Player) Send(pkt *packet.Packet) {
+	message := OutboundMessage{
+		Address: p.Address,
+		Packet:  pkt,
+	}
+	networkInput <- &message
+}
+
 // Kick kicks a player out of the server
 func (p *Player) Kick(reason string) {
 	if reason == "" {
@@ -45,11 +53,7 @@ func (p *Player) Kick(reason string) {
 	kickPacket := packet.New(0x02)
 	reasonBytes := []byte(reason)
 	kickPacket.AddField(&reasonBytes)
-	kickMessage := OutboundMessage{
-		Address: p.Address,
-		Packet:  kickPacket,
-	}
-	networkInput <- &kickMessage
+	p.Send(kickPacket)
 	delete(players, p.Address)
 }
 
