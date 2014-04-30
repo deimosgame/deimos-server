@@ -2,13 +2,16 @@ package main
 
 import (
 	"bitbucket.org/deimosgame/go-akadok/packet"
+	"encoding/json"
+	"io/ioutil"
 	"net"
+	"net/http"
 )
 
 type Player struct {
-	Name          string
-	AkadokAccount string
-	Address       *net.UDPAddr
+	Name    string
+	Account string
+	Address *net.UDPAddr
 
 	// Position
 	X float32
@@ -34,6 +37,7 @@ func (p *Player) Match(name string) bool {
 	return p.Name[:len(name)] == name || name == "*"
 }
 
+// Kick kicks a player out of the server
 func (p *Player) Kick(reason string) {
 	if reason == "" {
 		reason = "Kicked!"
@@ -47,4 +51,28 @@ func (p *Player) Kick(reason string) {
 	}
 	networkInput <- &kickMessage
 	delete(players, p.Address)
+}
+
+// RefreshName gets the player name from the web
+func (p *Player) RefreshName() error {
+	apiUrl := "https://deimos-ga.me/api/get-name/"
+	resp, err := http.Get(apiUrl + p.Account)
+	if err != nil {
+		return err
+	}
+	responseData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	type ApiResponse struct {
+		Success bool
+		Name    string
+	}
+	var responseStruct ApiResponse
+	err = json.Unmarshal(responseData, &responseStruct)
+	if err != nil {
+		return err
+	}
+	p.Name = responseStruct.Name
+	return nil
 }
