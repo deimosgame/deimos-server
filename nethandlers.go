@@ -142,5 +142,6 @@ func HandleChatPacket(h *PacketHandler, p *packet.Packet) {
 		h.Error()
 		return
 	}
+	log.Info("<" + player.Name + "> " + string(*message))
 	SendMessage("<" + player.Name + "> " + string(*message))
 }
