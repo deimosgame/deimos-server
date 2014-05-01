@@ -15,8 +15,15 @@ func WorldSimulation() {
 	for {
 		start := time.Now()
 
-		// TODO: Execute world simulation
+		// Execute world simulation
+		for _, player := range players {
+			if time.Since(player.LastUpdate) < time.Millisecond*15 {
+				continue
+			}
+			player.NextTick()
+		}
 
+		// Check if the calculation took more than the tick rate value
 		diff := time.Since(start)
 		if diff < tickRate {
 			if serverKeepupAlert {
