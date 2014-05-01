@@ -50,8 +50,9 @@ func HandleKickCommand(args []string) {
 			if i == 0 {
 				continue
 			}
-			reason += reasonWord
+			reason += " " + reasonWord
 		}
+		reason = reason[1:]
 	}
 
 	for _, currentPlayer := range players {
@@ -71,8 +72,9 @@ func HandleStopCommand(args []string) {
 			if i == 0 {
 				continue
 			}
-			reason += reasonWord
+			reason += " " + reasonWord
 		}
+		reason = reason[1:]
 	}
 
 	Stop(reason)
