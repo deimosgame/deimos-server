@@ -19,7 +19,7 @@ var (
 	configFile       = "server.cfg"
 	masterServerLost = false
 
-	networkInput chan *OutboundMessage
+	networkInput = make(chan *OutboundMessage)
 
 	// Game-related variables
 	currentMap string
@@ -40,35 +40,40 @@ func main() {
 
 	log.Notice("Akadok is loading...")
 
-	/* Commands parsing */
-
-	ParseCommands()
-
 	/* Server IP resolving */
 
 	ResolveIP()
 
-	/* Heartbeat scheduling */
-
-	Heartbeat()
-
-	/* Network routine start */
-
-	StartServer()
-
 	/* Setup handlers for incoming packets */
 
 	SetupHandlers()
+
+	/**
+	 *  Sub-routines permanently executed (in goroutines)
+	 */
+
+	/* Commands parsing routine */
+
+	go CommandParser()
+
+	/* Heartbeat scheduling */
+
+	go Heartbeat()
+
+	/* Start world simulation routine */
+
+	go WorldSimulation()
+
+	/* Network routine start */
+
+	go Server()
 
 	/* Tadaaaa */
 
 	log.Notice("Akadok has started")
 
 	// Keeps the main process idle
-	//
 	for {
-		select {}
-
 		time.Sleep(time.Millisecond * 50)
 	}
 }

@@ -15,14 +15,8 @@ type OutboundMessage struct {
 	Packet  *packet.Packet
 }
 
-// StartServer starts the UDP server in a different goroutine
-func StartServer() {
-	networkInput = make(chan *OutboundMessage)
-	go Server(networkInput)
-}
-
 // Server is the main function of the server, which mainly handles outbound data
-func Server(input chan *OutboundMessage) {
+func Server() {
 	service := ":" + strconv.Itoa(config.Port)
 	udpAddr, err := net.ResolveUDPAddr("udp4", service)
 	if err != nil {
@@ -38,7 +32,7 @@ func Server(input chan *OutboundMessage) {
 	go HandleClient(conn)
 	for {
 		select {
-		case m := <-input:
+		case m := <-networkInput:
 			encodedPackets := m.Packet.Encode()
 			for _, currentPacket := range *encodedPackets {
 				conn.WriteToUDP(*currentPacket, m.Address)

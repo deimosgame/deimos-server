@@ -6,12 +6,8 @@ import (
 	"strings"
 )
 
-// ParseCommands starts a separate routine to parse stdin (ATM) commands
-func ParseCommands() {
-	go Parser()
-}
-
-func Parser() {
+// CommandParser is the routine that parses stdin commands
+func CommandParser() {
 	input := bufio.NewReader(os.Stdin)
 	for {
 		line, _, err := input.ReadLine()
