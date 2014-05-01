@@ -28,3 +28,9 @@ func TestNormalizeName(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestUnNormalizeName(t *testing.T) {
+	if UnNormalizeName("this_is_a_test") != "ThisIsATest" {
+		t.Fail()
+	}
+}
