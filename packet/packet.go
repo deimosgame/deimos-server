@@ -63,27 +63,27 @@ func (p *Packet) AddFieldString(s *string) {
 	p.AddField(&data)
 }
 
-// GetField returns the value of a field using its index
-func (p *Packet) GetField(n int) (*[]byte, error) {
-	// Begining of the field
-	i := 0
-	for j := 0; j < n; i++ {
-		if i >= len(p.Data) {
-			return nil, errors.New("Field not found")
-		}
-		if p.Data[i] == 0 {
-			j++
-		}
+func (p *Packet) GetField(index, length int) (*[]byte, error) {
+	if index+length > len(p.Data) {
+		return &[]byte{}, errors.New("Data too long")
 	}
-	start := i
-	// End of the field
-	j := i
+	data := p.Data[index : index+length]
+	return &data, nil
+}
+
+// GetField returns the value of a field using its index
+func (p *Packet) GetFieldString(index int) (*string, error) {
+	if index > len(p.Data) {
+		s := ""
+		return &s, errors.New("Unknown index")
+	}
+	j := index
 	for ; j < len(p.Data); j++ {
 		if p.Data[j] == 0 {
 			break
 		}
 	}
-	field := p.Data[start:j]
+	field := string(p.Data[index:j])
 	return &field, nil
 }
 

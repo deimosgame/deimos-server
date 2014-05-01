@@ -59,7 +59,7 @@ func (h *PacketHandler) GetPlayer() (*Player, error) {
 // PacketHandshakeHandler (0x00)
 func HandleHandshakePacket(h *PacketHandler, p *packet.Packet) {
 	outPacket := packet.New(0)
-	if version, err := p.GetField(0); err != nil ||
+	if version, err := p.GetField(0, 1); err != nil ||
 		(*version)[0] != ProtocolVersion {
 		outPacket.AddFieldBytes(0)
 	} else {
@@ -77,18 +77,19 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 		return
 	}
 	// Retrive fields for the connection
-	userId, err := p.GetField(0)
+	userId, err := p.GetFieldString(0)
 	if err != nil {
 		h.Error()
 		return
 	}
-	token, err := p.GetField(1)
+	token, err := p.GetFieldString(len(*userId) + 1)
 	if err != nil {
 		h.Error()
 		return
 	}
+	log.Info(*userId + " " + *token)
 	// Check the credentials of the user
-	validToken, err := CheckToken(string(*userId), string(*token))
+	validToken, err := CheckToken(*userId, *token)
 	if err != nil {
 		h.Error()
 		return
@@ -136,11 +137,11 @@ func HandleChatPacket(h *PacketHandler, p *packet.Packet) {
 		h.Error()
 		return
 	}
-	message, err := p.GetField(0)
+	message, err := p.GetFieldString(0)
 	if err != nil {
 		h.Error()
 		return
 	}
-	log.Info("<" + player.Name + "> " + string(*message))
-	SendMessage("<" + player.Name + "> " + string(*message))
+	log.Info("<" + player.Name + "> " + *message)
+	SendMessage("<" + player.Name + "> " + *message)
 }

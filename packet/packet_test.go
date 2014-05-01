@@ -43,10 +43,10 @@ func TestAddField(t *testing.T) {
 	packet.AddField(&b2)
 
 	// Check read bytes
-	if d1, err := packet.GetField(0); err != nil || !bytes.Equal(*d1, b1) {
+	if d1, err := packet.GetField(0, 3); err != nil || !bytes.Equal(*d1, b1) {
 		t.Fail()
 	}
-	if d2, err := packet.GetField(1); err != nil || !bytes.Equal(*d2, b2) {
+	if d2, err := packet.GetField(3, 3); err != nil || !bytes.Equal(*d2, b2) {
 		t.Fail()
 	}
 }
@@ -59,10 +59,10 @@ func TestAddFieldBytes(t *testing.T) {
 	packet.AddFieldBytes(4, 5, 6)
 
 	// Check read bytes
-	if d1, err := packet.GetField(0); err != nil || !bytes.Equal(*d1, b1) {
+	if d1, err := packet.GetField(0, 3); err != nil || !bytes.Equal(*d1, b1) {
 		t.Fail()
 	}
-	if d2, err := packet.GetField(1); err != nil || !bytes.Equal(*d2, b2) {
+	if d2, err := packet.GetField(3, 3); err != nil || !bytes.Equal(*d2, b2) {
 		t.Fail()
 	}
 }
@@ -73,19 +73,19 @@ func TestGetField(t *testing.T) {
 	packet.AddField(&d)
 
 	// Check read bytes
-	if r, err := packet.GetField(0); err != nil || !bytes.Equal(*r, d) {
+	if r, err := packet.GetField(0, 3); err != nil || !bytes.Equal(*r, d) {
 		t.Fail()
 	}
 
 	// Unexisting field
-	if _, err := packet.GetField(1); err == nil {
+	if _, err := packet.GetField(3, 3); err == nil {
 		t.Log("Packet found an unexisting field in a packet")
 		t.Fail()
 	}
 }
 
 func TestEncode(t *testing.T) {
-	expectedPacketContents := []byte{11, 0, 0, 0, 1, 2, 3, 0, 4, 5, 6}
+	expectedPacketContents := []byte{10, 0, 0, 0, 1, 2, 3, 4, 5, 6}
 
 	packet := New(0)
 	packet.AddFieldBytes(1, 2, 3)
