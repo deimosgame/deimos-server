@@ -46,7 +46,14 @@ Here are a list of parameters that may be used in Akadok config files (unknown p
 
 **log_file**: Changes server's logs location. Default: server.log
 
+**auto_insecure**: Allows unauthentified connections to the server only if the master server is down. Use it only when the master server has great periods of downtime. Default: false
+
 **register_server**: Determines wether or not server will try to contact master server in order to be registered on public server list. Default: false
+
+**tickrate**: Tick rate of the server's world simulations (in milliseconds). Default: 15 (~ 66.6/s)
+
+**insecure**: Allow unauthentified connections to your server (STRONGLY UNRECOMMENDED). Default: false
+
 
 # Server commands
 

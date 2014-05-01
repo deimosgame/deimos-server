@@ -14,11 +14,13 @@ const (
 )
 
 var (
-	config            *AkadokConfig
-	log               *util.Logger
-	configFile        = "server.cfg"
+	config     *AkadokConfig
+	log        *util.Logger
+	configFile = "server.cfg"
+
 	masterServerLost  = false
 	serverKeepupAlert = false
+	insecureAlert     = false
 
 	networkInput = make(chan *OutboundMessage)
 

@@ -21,6 +21,7 @@ var (
 		Maps:           []string{"map1", "map2", "map3"},
 		Verbose:        false,
 		LogFile:        "server.log",
+		AutoInsecure:   false,
 		RegisterServer: true,
 		TickRate:       15,
 		Insecure:       false,
@@ -43,6 +44,7 @@ type AkadokConfig struct {
 	Maps           []string
 	Verbose        bool
 	LogFile        string
+	AutoInsecure   bool
 	RegisterServer bool
 	TickRate       int
 	Insecure       bool

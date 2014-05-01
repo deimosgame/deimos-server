@@ -91,6 +91,20 @@ func CheckToken(deimosId, token string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	// IMPORTANT: Remove the bypass token when in production
+	if insecureAlert {
+		insecureAlert = false
+		log.Notice("Authentication server has been reached. Server is now in secure mode")
+	}
 	return answer.Success || config.Insecure, nil
+}
+
+func CheckInsecure() bool {
+	if !config.AutoInsecure {
+		return false
+	}
+	if !insecureAlert {
+		insecureAlert = true
+		log.Notice("Authentication server is unreachable. Server is now in insecure mode")
+	}
+	return true
 }
