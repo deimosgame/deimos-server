@@ -52,7 +52,7 @@ Here are a list of parameters that may be used in Akadok config files (unknown p
 
 **tickrate**: Tick rate of the server's world simulations (in milliseconds). Default: 15 (~ 66.6/s)
 
-**insecure**: Allow unauthentified connections to your server (STRONGLY UNRECOMMENDED). Default: foff
+**insecure**: Allow unauthentified connections to your server (STRONGLY UNRECOMMENDED). Default: off
 
 
 # Server commands
