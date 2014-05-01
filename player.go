@@ -4,6 +4,7 @@ import (
 	"bitbucket.org/deimosgame/go-akadok/packet"
 	"encoding/json"
 	"io/ioutil"
+	"strings"
 	"net"
 	"net/http"
 )
@@ -34,7 +35,8 @@ type Player struct {
 
 // MatchName checks if a player name begins with a specific expression
 func (p *Player) Match(name string) bool {
-	return p.Name[:len(name)] == name || name == "*"
+	return strings.ToLower(p.Name[:len(name)]) == strings.ToLower(name)
+		|| name == "*"
 }
 
 func (p *Player) Send(pkt *packet.Packet) {
