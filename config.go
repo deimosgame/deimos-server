@@ -135,7 +135,7 @@ func LoadConfig() {
 	}
 
 	// Additional loading operations
-	tickRateSecs = config.TickRate / 1000
+	tickRateSecs = float32(config.TickRate / 1000)
 }
 
 // GetConfigItem returns a string representation of a config item
