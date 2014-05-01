@@ -109,8 +109,7 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 	players[h.Address.String()] = &newPlayer
 	// Send authorization packet
 	outPacket.AddFieldBytes(1)
-	currentMapBytes := []byte(currentMap)
-	outPacket.AddField(&currentMapBytes)
+	outPacket.AddFieldString(&currentMap)
 	h.Answer(outPacket)
 	log.Info(newPlayer.Name + " (" + newPlayer.Account + " - " +
 		h.Address.IP.String() + ") has joined the game!")

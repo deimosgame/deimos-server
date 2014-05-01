@@ -45,11 +45,6 @@ func ReadSinglePacket(packetBuffer *[]byte) (*Packet, error) {
 // AddField adds a new field at the end of the current packet
 func (p *Packet) AddField(fieldData *[]byte) error {
 	packetBuffer := bytes.NewBuffer(p.Data)
-	if p.Data != nil {
-		if err := packetBuffer.WriteByte(0); err != nil {
-			return err
-		}
-	}
 	if _, err := packetBuffer.Write(*fieldData); err != nil {
 		return err
 	}
@@ -60,6 +55,12 @@ func (p *Packet) AddField(fieldData *[]byte) error {
 // AddFieldBytes is an alias for AddField, except it doesn't needs an array
 func (p *Packet) AddFieldBytes(b ...byte) {
 	p.AddField(&b)
+}
+
+// AddFieldString adds a string to a packet
+func (p *Packet) AddFieldString(s *string) {
+	data := append([]byte(*s), 0)
+	p.AddField(&data)
 }
 
 // GetField returns the value of a field using its index
@@ -88,6 +89,10 @@ func (p *Packet) GetField(n int) (*[]byte, error) {
 
 // Encode encodes the packets to a byte array in order to send it on the network
 func (p *Packet) Encode() *[]*[]byte {
+	// Remove the last \00 if necessary
+	if p.Data[len(p.Data)-1] == 0 {
+		p.Data = p.Data[:len(p.Data)-1]
+	}
 	if len(p.Data) <= PacketSize-4 {
 		// Checksum
 		checksum := byte((len(p.Data) + 4) % 256)

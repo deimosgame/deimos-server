@@ -98,8 +98,7 @@ func CheckHandler(origin *net.UDPAddr, p *packet.Packet) {
 // SendMessage messages all players on the server
 func SendMessage(message string) {
 	messagePacket := packet.New(0x03)
-	messageBytes := []byte(message)
-	messagePacket.AddField(&messageBytes)
+	messagePacket.AddFieldString(&message)
 	for _, currentPlayer := range players {
 		currentPlayer.Send(messagePacket)
 	}
