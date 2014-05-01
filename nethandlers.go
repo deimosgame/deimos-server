@@ -87,7 +87,6 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 		h.Error()
 		return
 	}
-	log.Info(*userId + " " + *token)
 	// Check the credentials of the user
 	validToken, err := CheckToken(*userId, *token)
 	if err != nil {
