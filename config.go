@@ -24,13 +24,13 @@ var (
 		RegisterServer: true,
 		Insecure:       false,
 	}
-	// Simplified default config
-	writtenDefaultConfig = AkadokConfig{
-		Name:       defaultConfig.Name,
-		Port:       defaultConfig.Port,
-		MaxPlayers: defaultConfig.MaxPlayers,
-		Maps:       defaultConfig.Maps,
-		LogFile:    defaultConfig.LogFile,
+	// Simplified default config elements
+	writtenElements = map[string]bool{
+		"Name":       true,
+		"Port":       true,
+		"MaxPlayers": true,
+		"Maps":       true,
+		"LogFile":    true,
 	}
 )
 
@@ -151,12 +151,16 @@ func WriteDefaultConfig() {
 	cfg := conf.NewConfigFile()
 
 	// Default config generation by reflection
-	reflectedCfg := reflect.ValueOf(writtenDefaultConfig)
+	reflectedCfg := reflect.ValueOf(defaultConfig)
 
 	for i := 0; i < reflectedCfg.NumField(); i++ {
 
 		fieldName := reflectedCfg.Type().Field(i).Name
 		fieldValue := reflectedCfg.Field(i).Interface()
+
+		if !writtenElements[fieldName] {
+			continue
+		}
 
 		switch reflect.TypeOf(fieldValue).String() {
 		// Same hack as for loadConfig()
