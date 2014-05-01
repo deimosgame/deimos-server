@@ -22,6 +22,7 @@ var (
 		Verbose:        false,
 		LogFile:        "server.log",
 		RegisterServer: true,
+		TickRate:       15,
 		Insecure:       false,
 	}
 	// Simplified default config elements
@@ -43,6 +44,7 @@ type AkadokConfig struct {
 	Verbose        bool
 	LogFile        string
 	RegisterServer bool
+	TickRate       int
 	Insecure       bool
 }
 
