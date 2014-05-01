@@ -85,7 +85,8 @@ func LoadConfig() {
 		val := fieldValue
 
 		switch reflect.TypeOf(fieldValue).String() {
-		// Easier type checking (especially for non-primitive types) using string conversion
+		// Easier type checking (especially for non-primitive types) using
+		// string conversion
 
 		case "string":
 			val, err := cfg.GetString("default", fieldName)
@@ -111,7 +112,8 @@ func LoadConfig() {
 		case "[]string":
 			serializedString, err := cfg.GetString("default", fieldName)
 			if err == nil {
-				serializedString = strings.Replace(serializedString, ", ", ",", 0)
+				serializedString = strings.Replace(serializedString, ", ",
+					",", 0)
 				val = strings.Split(serializedString, ",")
 				field.Set(reflect.ValueOf(val.([]string)))
 			}

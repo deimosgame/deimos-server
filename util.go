@@ -77,11 +77,11 @@ func CheckToken(deimosId, token string) (bool, error) {
 	apiUrl := "https://deimos-ga.me/api/validate-token/"
 	resp, err := http.Get(apiUrl + deimosId + "/" + token)
 	if err != nil {
-		return false, err
+		return CheckInsecure(), err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return false, err
+		return CheckInsecure(), err
 	}
 	type Answer struct {
 		Success bool
@@ -89,7 +89,7 @@ func CheckToken(deimosId, token string) (bool, error) {
 	answer := Answer{}
 	err = json.Unmarshal(body, &answer)
 	if err != nil {
-		return false, err
+		return CheckInsecure(), err
 	}
 	if insecureAlert {
 		insecureAlert = false
@@ -98,6 +98,7 @@ func CheckToken(deimosId, token string) (bool, error) {
 	return answer.Success || config.Insecure, nil
 }
 
+// CheckInsecure emits an alert for insecure mode if needed
 func CheckInsecure() bool {
 	if !config.AutoInsecure {
 		return false
