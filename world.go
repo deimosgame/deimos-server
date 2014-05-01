@@ -9,12 +9,9 @@ type World struct {
 	entities []*Entity
 }
 
-var (
-	tickRate = time.Millisecond * time.Duration(config.TickRate)
-)
-
 // WorldSimulation does all the world simulation work
 func WorldSimulation() {
+	tickRate := time.Millisecond * time.Duration(config.TickRate)
 	for {
 		start := time.Now()
 
