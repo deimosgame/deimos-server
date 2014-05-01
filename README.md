@@ -42,17 +42,17 @@ Here are a list of parameters that may be used in Akadok config files (unknown p
 
 **maps**: Maps used for map rotation. Map names are separated by commas. Default: map1, map2, map3
 
-**verbose**: Used for debugging purposes. Outputs every event on the server to logs. Default: false
+**verbose**: Used for debugging purposes. Outputs every event on the server to logs. Default: off
 
 **log_file**: Changes server's logs location. Default: server.log
 
-**auto_insecure**: Allows unauthentified connections to the server only if the master server is down. Use it only when the master server has great periods of downtime. Default: false
+**auto_insecure**: Allows unauthentified connections to the server only if the master server is down. Use it only when the master server has great periods of downtime. Default: off
 
-**register_server**: Determines wether or not server will try to contact master server in order to be registered on public server list. Default: false
+**register_server**: Determines wether or not server will try to contact master server in order to be registered on public server list. Default: on
 
 **tickrate**: Tick rate of the server's world simulations (in milliseconds). Default: 15 (~ 66.6/s)
 
-**insecure**: Allow unauthentified connections to your server (STRONGLY UNRECOMMENDED). Default: false
+**insecure**: Allow unauthentified connections to your server (STRONGLY UNRECOMMENDED). Default: foff
 
 
 # Server commands
@@ -61,5 +61,6 @@ The following commands are available when running your Akadok server:
 
 | Command | Arguments | Effect |
 | ------- | --------- | :----- |
+| config | <element> | Lookups an element in the server configuration |
 | kick | <* OR player> [reason] | Kicks a player |
 | stop | [reason] | Stops the server |
