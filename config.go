@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"code.google.com/p/goconf/conf"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -132,13 +133,53 @@ func LoadConfig() {
 			panic("Unknown configuration directive " + fieldName)
 		}
 	}
+
+	// Additional loading operations
+	tickRateSecs = config.TickRate / 1000
+}
+
+// GetConfigItem returns a string representation of a config item
+func GetConfigItem(name string) (string, error) {
+	reflectedCfg, wantedName := reflect.ValueOf(config).Elem(), UnNormalizeName(name)
+	for i := 0; i < reflectedCfg.NumField(); i++ {
+		fieldName := reflectedCfg.Type().Field(i).Name
+		if fieldName != wantedName {
+			continue
+		}
+		fieldValue := reflectedCfg.Field(i).Interface()
+		switch reflect.TypeOf(fieldValue).String() {
+		case "string":
+			return fieldValue.(string), nil
+		case "int":
+			return strconv.Itoa(fieldValue.(int)), nil
+		case "bool":
+			if fieldValue.(bool) {
+				return "on", nil
+			}
+			return "off", nil
+		case "[]string":
+			return strings.Join(fieldValue.([]string), ","),
+				nil
+		case "net.IP":
+			return fieldValue.(net.IP).String(), nil
+		default:
+			fmt.Println(wantedName, fieldName)
+			return "", errors.New("Unknown field type")
+		}
+	}
+	return "", errors.New("Impossible case")
+}
+
+// SetConfigItem sets a config item based on a string representation of it
+func SetConfigItem(name, value string) error {
+	return errors.New("unimplemented")
 }
 
 // NormalizeName turns an internal config entry name into a better name
 // for configuration files (UpperCamelCase to lower_snake_case)
 func NormalizeName(name string) string {
 	buf := bytes.NewBuffer(nil)
-	for i := 0; i < len(name); i++ {
+	for i := range name {
 		char := string(name[i])
 		if name[i] >= 'A' && name[i] <= 'Z' && i != 0 {
 			buf.WriteString("_")
@@ -147,6 +188,24 @@ func NormalizeName(name string) string {
 			buf.WriteString(strings.ToLower(char))
 		} else {
 			buf.WriteString(char)
+		}
+	}
+	return buf.String()
+}
+
+// UnNormalizeName does the invert of NormalizeName
+func UnNormalizeName(name string) string {
+	name = strings.ToLower(name)
+	buf := bytes.NewBuffer(nil)
+	upperFlag := true
+	for _, char := range name {
+		if upperFlag {
+			upperFlag = false
+			buf.WriteByte(byte(char - 32))
+		} else if char == '_' {
+			upperFlag = true
+		} else {
+			buf.WriteByte(byte(char))
 		}
 	}
 	return buf.String()

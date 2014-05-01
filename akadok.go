@@ -23,6 +23,7 @@ var (
 	insecureAlert     = false
 
 	networkInput = make(chan *OutboundMessage)
+	tickRateSecs float32
 
 	// Game-related variables
 	currentMap string
