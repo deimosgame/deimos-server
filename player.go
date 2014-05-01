@@ -7,30 +7,37 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type Player struct {
-	Name    string
+	Name    string `prefix:"N"`
 	Account string
 	Address *net.UDPAddr
 
+	// Gameplay values
+	Score    byte `prefix:"L"`
+	Instance string
+
 	// Position
-	X float32
-	Y float32
-	Z float32
+	X float32 `prefix:"X"`
+	Y float32 `prefix:"Y"`
+	Z float32 `prefix:"Z"`
 	// Rotation
-	BodyRotation float32
-	HeadRotation float32
+	XRotation float32 `prefix:"P"`
+	YRotation float32 `prefix:"Q"`
 	// Velocity
-	XVelocity           float32
-	YVelocity           float32
-	ZVelocity           float32
-	BodyAngularVelocity float32
-	HeadAngularVelocity float32
+	XVelocity        float32 `prefix:"T"`
+	YVelocity        float32 `prefix:"S"`
+	ZVelocity        float32 `prefix:"T"`
+	AngularVelocityX float32 `prefix:"U"`
+	AngularVelocityY float32 `prefix:"V"`
 
 	// Misc values
-	ModelId        string
-	SelectedWeapon byte
+	ModelId        string `prefix:"M"`
+	SelectedWeapon byte   `prefix:"W"`
+
+	LastUpdate time.Time
 }
 
 // MatchName checks if a player name begins with a specific expression
@@ -45,6 +52,18 @@ func (p *Player) Send(pkt *packet.Packet) {
 		Packet:  pkt,
 	}
 	networkInput <- &message
+}
+
+// NextTick updates a player for the next tick (for prediction purposes)
+func (p *Player) NextTick() {
+	p.X = p.X + p.XVelocity*tickRateSecs
+	p.Y = p.Y + p.YVelocity*tickRateSecs
+	p.Z = p.Z + p.ZVelocity*tickRateSecs
+
+	p.XRotation = p.XRotation + p.AngularVelocityX*tickRateSecs
+	p.YRotation = p.YRotation + p.AngularVelocityY*tickRateSecs
+
+	p.LastUpdate = time.Now()
 }
 
 // Kick kicks a player out of the server
