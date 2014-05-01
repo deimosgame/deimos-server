@@ -28,7 +28,7 @@ var (
 	// Game-related variables
 	currentMap string
 	players    = make(map[string]*Player)
-	entities   = make([]*Entity)
+	entities   = make(map[*Entity]bool)
 )
 
 func main() {
