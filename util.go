@@ -27,56 +27,40 @@ func ResolveIP() {
 		config.Port))
 }
 
-// Heartbeat inits the heartbeat to the master server
+// Heartbeat is responsible of the heartbeat to the master server
 func Heartbeat() {
 	if !config.RegisterServer {
 		return
 	}
-	go func() {
-		// heartbeatCaller wraps util.Heartbeat with config generation
-		HeartbeatCaller := func() {
-			log.Debug("Sending a heartbeat to the master server")
+	for {
+		log.Debug("Sending a heartbeat to the master server")
 
-			// Generating player list
-			playerList, i := make([]string, len(players)), 0
-			for _, v := range players {
-				playerList[i] = v.Name
-				i++
-			}
-
-			heartbeatConfig := util.HeartbeatConfig{
-				Ip:         config.Host.String(),
-				Port:       config.Port,
-				Name:       config.Name,
-				PlayedMap:  currentMap,
-				Players:    strings.Join(playerList, ", "),
-				MaxPlayers: config.MaxPlayers,
-			}
-			err := util.Heartbeat(MasterServer, &heartbeatConfig)
-
-			if !masterServerLost && err != nil {
-				log.Warn("Error while sending data to master server!")
-				masterServerLost = true
-			} else if masterServerLost {
-				log.Notice("Regained connection with the master server")
-				masterServerLost = false
-			}
+		// Generating player list
+		playerList, i := make([]string, len(players)), 0
+		for _, v := range players {
+			playerList[i] = v.Name
+			i++
 		}
 
-		// Produces a heartbeat every so often
-		tickChan := time.Tick(HeartbeatInterval)
-
-		HeartbeatCaller()
-
-		for {
-			select {
-			case <-tickChan:
-				HeartbeatCaller()
-			default:
-				time.Sleep(50 * time.Millisecond)
-			}
+		heartbeatConfig := util.HeartbeatConfig{
+			Ip:         config.Host.String(),
+			Port:       config.Port,
+			Name:       config.Name,
+			PlayedMap:  currentMap,
+			Players:    strings.Join(playerList, ", "),
+			MaxPlayers: config.MaxPlayers,
 		}
-	}()
+		err := util.Heartbeat(MasterServer, &heartbeatConfig)
+
+		if !masterServerLost && err != nil {
+			log.Warn("Error while sending data to master server!")
+			masterServerLost = true
+		} else if masterServerLost {
+			log.Notice("Regained connection with the master server")
+			masterServerLost = false
+		}
+		time.Sleep(HeartbeatInterval)
+	}
 }
 
 // InitLogging creates the log object and sets its params
