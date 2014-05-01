@@ -24,6 +24,14 @@ var (
 		RegisterServer: true,
 		Insecure:       false,
 	}
+	// Simplified default config
+	writtenDefaultConfig = AkadokConfig{
+		Name:       defaultConfig.Name,
+		Port:       defaultConfig.Port,
+		MaxPlayers: defaultConfig.MaxPlayers,
+		Maps:       defaultConfig.Maps,
+		LogFile:    defaultConfig.LogFile,
+	}
 )
 
 type AkadokConfig struct {
@@ -143,7 +151,7 @@ func WriteDefaultConfig() {
 	cfg := conf.NewConfigFile()
 
 	// Default config generation by reflection
-	reflectedCfg := reflect.ValueOf(defaultConfig)
+	reflectedCfg := reflect.ValueOf(writtenDefaultConfig)
 
 	for i := 0; i < reflectedCfg.NumField(); i++ {
 
@@ -165,8 +173,6 @@ func WriteDefaultConfig() {
 		case "[]string":
 			cfg.AddOption("default", fieldName,
 				strings.Join(fieldValue.([]string), ", "))
-		case "net.IP":
-			cfg.AddOption("default", fieldName, fieldValue.(net.IP).String())
 		default:
 			panic("Unknown configuration directive " + fieldName)
 		}
