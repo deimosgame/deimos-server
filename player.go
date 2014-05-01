@@ -56,6 +56,10 @@ func (p *Player) Send(pkt *packet.Packet) {
 
 // NextTick updates a player for the next tick (for prediction purposes)
 func (p *Player) NextTick() {
+	if time.Since(player.LastUpdate) < time.Millisecond*15 {
+		continue
+	}
+
 	p.X = p.X + p.XVelocity*tickRateSecs
 	p.Y = p.Y + p.YVelocity*tickRateSecs
 	p.Z = p.Z + p.ZVelocity*tickRateSecs

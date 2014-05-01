@@ -17,9 +17,6 @@ func WorldSimulation() {
 
 		// Execute world simulation
 		for _, player := range players {
-			if time.Since(player.LastUpdate) < time.Millisecond*15 {
-				continue
-			}
 			player.NextTick()
 		}
 
