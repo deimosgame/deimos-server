@@ -24,6 +24,8 @@ func CommandParser() {
 // HandleCommand handles the commands and their arguments
 func HandleCommand(command string, args []string) {
 	switch command {
+	case "config":
+		HandleConfigCommand(args)
 	case "stop":
 		HandleStopCommand(args)
 	case "kick":
@@ -32,8 +34,23 @@ func HandleCommand(command string, args []string) {
 }
 
 /**
- *  Command handlers (convention)
+ *  Command handlers (convention: HandleXCommand)
  */
+
+func HandleConfigCommand(args []string) {
+	if len(args) == 0 {
+		log.Info("config: Gets/changes the config of the server")
+		log.Info("	Usage: config <item> [value]")
+		return
+	} else if len(args) == 1 {
+		val, err := GetConfigItem(args[0])
+		if err != nil {
+			log.Error("Unknown config item!")
+			return
+		}
+		log.Info(args[0] + ": " + val)
+	}
+}
 
 // HandleKickCommand handles a player kick command
 // Usage: kick <*|player> [reason]
