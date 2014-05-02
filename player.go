@@ -37,7 +37,9 @@ type Player struct {
 	ModelId       string `prefix:"M"`
 	CurrentWeapon byte   `prefix:"W"`
 
-	LastUpdate time.Time
+	LastUpdate       time.Time
+	LastAcknowledged *World
+	Initialized      bool
 }
 
 // MatchName checks if a player name begins with a specific expression

@@ -26,9 +26,11 @@ var (
 	tickRateSecs float32
 
 	// Game-related variables
-	currentMap string
-	players    = make(map[string]*Player)
-	entities   = make(map[*Entity]bool)
+	currentMap      string
+	worldSnapshotId uint32 = 0
+	worldSnapshots         = make(map[uint32]*World)
+	players                = make(map[string]*Player)
+	entities               = make(map[*Entity]bool)
 )
 
 func main() {

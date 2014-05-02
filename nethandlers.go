@@ -2,6 +2,7 @@ package main
 
 import (
 	"bitbucket.org/deimosgame/go-akadok/packet"
+	"encoding/binary"
 	"errors"
 	"net"
 )
@@ -12,6 +13,7 @@ func SetupHandlers() {
 	Handle(0x01, HandleClientConnectionPacket)
 	Handle(0x02, HandleDisconnectionPacket)
 	Handle(0x03, HandleChatPacket)
+	Handle(0x04, HandleAcknowledgementPacket)
 }
 
 func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
@@ -56,7 +58,7 @@ func (h *PacketHandler) GetPlayer() (*Player, error) {
  *  Various packet handlers (convention: HandleXPacket)
  */
 
-// PacketHandshakeHandler (0x00)
+// HandleHandshakePacket (0x00)
 func HandleHandshakePacket(h *PacketHandler, p *packet.Packet) {
 	outPacket := packet.New(0)
 	if version, err := p.GetField(0, 1); err != nil ||
@@ -68,7 +70,7 @@ func HandleHandshakePacket(h *PacketHandler, p *packet.Packet) {
 	h.Answer(outPacket)
 }
 
-// PacketClientConnectionHandler (0x01). Allows a player to connect if
+// HandleClientConnectionPacket (0x01). Allows a player to connect if
 // everything is alright
 func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 	if _, ok := players[h.Address.String()]; ok {
@@ -102,8 +104,10 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 	}
 	// Create a player
 	newPlayer := Player{
-		Account: string(*userId),
-		Address: h.Address,
+		Account:          string(*userId),
+		Address:          h.Address,
+		LastAcknowledged: &World{},
+		Initialized:      true,
 	}
 	newPlayer.RefreshName()
 	players[h.Address.String()] = &newPlayer
@@ -129,7 +133,7 @@ func HandleDisconnectionPacket(h *PacketHandler, p *packet.Packet) {
 	SendMessage(player.Name + " has left the server.")
 }
 
-// PacketChatHandler (0x03) handles the chat packets
+// HandleChatPacket (0x03) handles the chat packets
 func HandleChatPacket(h *PacketHandler, p *packet.Packet) {
 	player, err := h.GetPlayer()
 	if err != nil {
@@ -143,4 +147,26 @@ func HandleChatPacket(h *PacketHandler, p *packet.Packet) {
 	}
 	log.Info("<" + player.Name + "> " + *message)
 	SendMessage("<" + player.Name + "> " + *message)
+}
+
+// HandleAcknowledgementPacket (0x04) handles world acknowledgement packets from
+// the client
+func HandleAcknowledgementPacket(h *PacketHandler, p *packet.Packet) {
+	player, err := h.GetPlayer()
+	if err != nil {
+		h.Error()
+		return
+	}
+	idBytes, err := p.GetField(0, 4)
+	if err != nil || len(*idBytes) != 4 {
+		h.Error()
+		return
+	}
+	id := binary.LittleEndian.Uint32(*idBytes)
+	if snapshot, ok := worldSnapshots[id]; ok {
+		player.LastAcknowledged = snapshot
+	} else {
+		h.Error()
+		return
+	}
 }
