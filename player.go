@@ -114,5 +114,10 @@ func (p *Player) RefreshName() error {
 
 // Remove remove a player form the server
 func (p *Player) Remove() {
-	delete(players, p.Address.String())
+	for i, player := range players {
+		if player.Address.String() == p.Address.String() {
+			delete(players, i)
+			return
+		}
+	}
 }

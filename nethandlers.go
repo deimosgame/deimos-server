@@ -50,11 +50,12 @@ func (h *PacketHandler) Error() {
 
 // GetPlayer allows a handler to easily get a player from its address
 func (h *PacketHandler) GetPlayer() (*Player, error) {
-	player, ok := players[h.Address.String()]
-	if !ok {
-		return nil, errors.New("Unknown player")
+	for _, player := range players {
+		if player.Address.String() == h.Address.String() {
+			return player, nil
+		}
 	}
-	return player, nil
+	return nil, errors.New("Unknown player")
 }
 
 /**
@@ -76,8 +77,8 @@ func HandleHandshakePacket(h *PacketHandler, p *packet.Packet) {
 // HandleClientConnectionPacket (0x01). Allows a player to connect if
 // everything is alright
 func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
-	if _, ok := players[h.Address.String()]; ok {
-		// Player is already connected (what a dumbass!)
+	if _, err := h.GetPlayer(); err == nil {
+		// Player is already connected
 		h.Error()
 		return
 	}
@@ -113,7 +114,15 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 		Initialized:      true,
 	}
 	newPlayer.RefreshName()
-	players[h.Address.String()] = &newPlayer
+
+	i := byte(0)
+	for ; i <= 255; i++ {
+		if _, ok := players[i]; !ok {
+			break
+		}
+	}
+	players[i] = &newPlayer
+
 	// Send authorization packet
 	outPacket.AddFieldBytes(1)
 	outPacket.AddFieldString(&currentMap)

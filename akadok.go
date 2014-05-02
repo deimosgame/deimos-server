@@ -29,7 +29,7 @@ var (
 	currentMap      string
 	worldSnapshotId uint32 = 0
 	worldSnapshots         = make(map[uint32]*World)
-	players                = make(map[string]*Player)
+	players                = make(map[byte]*Player)
 	entities               = make(map[*Entity]bool)
 )
 
