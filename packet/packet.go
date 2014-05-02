@@ -90,9 +90,11 @@ func (p *Packet) GetFieldString(index int) (*string, error) {
 // Encode encodes the packets to a byte array in order to send it on the network
 func (p *Packet) Encode() *[]*[]byte {
 	// Remove the last \00 if necessary
-	if p.Data[len(p.Data)-1] == 0 {
-		p.Data = p.Data[:len(p.Data)-1]
+	i := 1
+	for ; i <= len(p.Data) && p.Data[len(p.Data)-i] == 0; i++ {
 	}
+	p.Data = p.Data[:len(p.Data)-i+1]
+
 	if len(p.Data) <= PacketSize-4 {
 		// Checksum
 		checksum := byte((len(p.Data) + 4) % 256)
