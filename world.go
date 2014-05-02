@@ -15,13 +15,14 @@ type World struct {
 	Initialized bool
 }
 
-func (w *World) Packet(uuid uint32, compareTo *World) *packet.Packet {
-	p := packet.New(0x04)
+func (w *World) Packet(uuid uint32, compareTo *World) []*packet.Packet {
+	packets, i := make([]*packet.Packet, 1), 0
+	packets[i] = packet.New(0x04)
 
 	idBuf := bytes.NewBuffer(nil)
 	binary.Write(idBuf, binary.LittleEndian, uuid)
 	bufBytes := idBuf.Bytes()
-	p.AddField(&bufBytes)
+	packets[i].AddField(&bufBytes)
 
 	if len(w.Players) > 0 {
 		addedField := false
@@ -49,16 +50,19 @@ func (w *World) Packet(uuid uint32, compareTo *World) *packet.Packet {
 
 			if !addedField && len(newBytes) > 0 {
 				addedField = true
-				p.AddFieldBytes(byte('A'))
+				packets[i].AddFieldBytes(byte('A'))
 			}
 
-			p.AddField(&newBytes)
+			// Smooth splitting
+			if len(packets[i].Data)+len(newBytes) > packet.PacketSize {
+				packets = append(packets, packet.New(0x04))
+				i++
+			}
+
+			packets[i].AddField(&newBytes)
 		}
 	}
-	// if len(w.Entities) > 0 {
-	// 	p.AddFieldBytes(byte('B'))
-	// }
-	return p
+	return packets
 }
 
 // makePlayerPacket creates a player element in the world packet based on
@@ -145,7 +149,8 @@ func WorldSimulation() {
 
 		// Broadcast the snapshot to players
 		for _, player := range players {
-			player.Send(save.Packet(worldSnapshotId-1, player.LastAcknowledged))
+			player.Send(save.Packet(worldSnapshotId-1,
+				player.LastAcknowledged)...)
 		}
 
 		// Check if the calculation took more than the tick rate value
