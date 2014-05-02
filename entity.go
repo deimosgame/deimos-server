@@ -1,5 +1,9 @@
 package main
 
+import (
+	"time"
+)
+
 type Entity struct {
 	// Position
 	X float32
@@ -23,15 +27,15 @@ type Entity struct {
 }
 
 func (e *Entity) NextTick() {
-	if time.Since(player.LastUpdate) < time.Millisecond*15 {
-		continue
+	if time.Since(e.LastUpdate) < time.Millisecond*15 {
+		return
 	}
 
 	e.X = e.X + e.XVelocity*tickRateSecs
 	e.Y = e.Y + e.YVelocity*tickRateSecs
 	e.Z = e.Z + e.ZVelocity*tickRateSecs
 
-	p.XRotation = p.XRotation + p.AngularVelocityX*tickRateSecs
-	p.YRotation = p.YRotation + p.AngularVelocityY*tickRateSecs
-	p.ZRotation = p.ZRotation + p.AngularVelocityZ*tickRateSecs
+	e.XRotation = e.XRotation + e.XAngularVelocity*tickRateSecs
+	e.YRotation = e.YRotation + e.YAngularVelocity*tickRateSecs
+	e.ZRotation = e.ZRotation + e.ZAngularVelocity*tickRateSecs
 }
