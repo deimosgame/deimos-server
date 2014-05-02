@@ -48,12 +48,15 @@ func (p *Player) Match(name string) bool {
 		name == "*"
 }
 
-func (p *Player) Send(pkt *packet.Packet) {
-	message := OutboundMessage{
-		Address: p.Address,
-		Packet:  pkt,
+// Send send multiple packets to a player
+func (p *Player) Send(packets ...*packet.Packet) {
+	for _, pkt := range packets {
+		message := OutboundMessage{
+			Address: p.Address,
+			Packet:  pkt,
+		}
+		networkInput <- &message
 	}
-	networkInput <- &message
 }
 
 // NextTick updates a player for the next tick (for prediction purposes)
