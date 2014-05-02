@@ -19,6 +19,9 @@ func WorldSimulation() {
 		for _, player := range players {
 			player.NextTick()
 		}
+		for entity, _ := range entities {
+			entity.NextTick()
+		}
 
 		// Check if the calculation took more than the tick rate value
 		diff := time.Since(start)
