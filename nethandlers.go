@@ -127,6 +127,9 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 	outPacket.AddFieldBytes(1)
 	outPacket.AddFieldString(&currentMap)
 	h.Answer(outPacket)
+
+	UpdatePlayerList()
+
 	log.Info(newPlayer.Name + " (" + newPlayer.Account + " - " +
 		h.Address.IP.String() + ") has joined the game!")
 	SendMessage(newPlayer.Name + " has joined the game!")
@@ -183,7 +186,7 @@ func HandleAcknowledgementPacket(h *PacketHandler, p *packet.Packet) {
 	}
 }
 
-// HandleMovementPacket changes the position of the player
+// HandleMovementPacket (0x05) changes the position of the player
 func HandleMovementPacket(h *PacketHandler, p *packet.Packet) {
 	player, err := h.GetPlayer()
 	if err != nil || len(p.Data) != 40 {

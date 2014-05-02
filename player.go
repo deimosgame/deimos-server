@@ -2,6 +2,7 @@ package main
 
 import (
 	"bitbucket.org/deimosgame/go-akadok/packet"
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net"
@@ -119,5 +120,22 @@ func (p *Player) Remove() {
 			delete(players, i)
 			return
 		}
+	}
+	UpdatePlayerList()
+}
+
+// UpdatePlayerList sends the packet 0x06 to make clients update the player list
+func UpdatePlayerList() {
+	buf := bytes.NewBuffer(nil)
+	for i, player := range players {
+		buf.WriteByte(i)
+		buf.Write([]byte(player.Name))
+		buf.WriteByte(0x00)
+	}
+	p := packet.New(0x06)
+	bufferBytes := buf.Bytes()
+	p.AddField(&bufferBytes)
+	for _, player := range players {
+		player.Send(p)
 	}
 }
