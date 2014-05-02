@@ -24,7 +24,7 @@ var (
 		LogFile:        "server.log",
 		AutoInsecure:   false,
 		RegisterServer: true,
-		TickRate:       15,
+		Tickrate:       15,
 		Insecure:       false,
 	}
 	// Simplified default config elements
@@ -47,7 +47,7 @@ type AkadokConfig struct {
 	LogFile        string
 	AutoInsecure   bool
 	RegisterServer bool
-	TickRate       int
+	Tickrate       int
 	Insecure       bool
 }
 
@@ -135,7 +135,7 @@ func LoadConfig() {
 	}
 
 	// Additional loading operations
-	tickRateSecs = float32(config.TickRate / 1000)
+	tickRateSecs = float32(config.Tickrate / 1000)
 }
 
 // GetConfigItem returns a string representation of a config item

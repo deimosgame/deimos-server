@@ -104,7 +104,7 @@ func makePlayerPacket(p1, p2 *Player) []byte {
 
 // WorldSimulation does all the world simulation work
 func WorldSimulation() {
-	tickRate := time.Millisecond * time.Duration(config.TickRate)
+	tickRate := time.Millisecond * time.Duration(config.Tickrate)
 	for {
 		start := time.Now()
 
