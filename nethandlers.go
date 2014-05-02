@@ -2,9 +2,11 @@ package main
 
 import (
 	"bitbucket.org/deimosgame/go-akadok/packet"
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"net"
+	"time"
 )
 
 // SetupHandlers contains the handlers for each packet ID
@@ -14,6 +16,7 @@ func SetupHandlers() {
 	Handle(0x02, HandleDisconnectionPacket)
 	Handle(0x03, HandleChatPacket)
 	Handle(0x04, HandleAcknowledgementPacket)
+	Handle(0x05, HandleMovementPacket)
 }
 
 func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
@@ -169,4 +172,51 @@ func HandleAcknowledgementPacket(h *PacketHandler, p *packet.Packet) {
 		h.Error()
 		return
 	}
+}
+
+// HandleMovementPacket changes the position of the player
+func HandleMovementPacket(h *PacketHandler, p *packet.Packet) {
+	player, err := h.GetPlayer()
+	if err != nil || len(p.Data) != 40 {
+		h.Error()
+		return
+	}
+	// Getting variables out of the packet
+	for i := 0; i < 40; i += 4 {
+		field, err := p.GetField(i, 4)
+		if err != nil {
+			h.Error()
+			return
+		}
+		var element float32
+		buf := bytes.NewReader(*field)
+		err = binary.Read(buf, binary.LittleEndian, &element)
+		if err != nil {
+			h.Error()
+			return
+		}
+		switch i {
+		case 0:
+			player.X = element
+		case 4:
+			player.Y = element
+		case 8:
+			player.Z = element
+		case 12:
+			player.XRotation = element
+		case 16:
+			player.YRotation = element
+		case 20:
+			player.XVelocity = element
+		case 24:
+			player.YVelocity = element
+		case 28:
+			player.ZVelocity = element
+		case 32:
+			player.AngularVelocityX = element
+		case 36:
+			player.AngularVelocityY = element
+		}
+	}
+	player.LastUpdate = time.Now()
 }
