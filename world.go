@@ -89,7 +89,7 @@ func (w *World) Packet(uuid uint32, compareTo *World) []*packet.Packet {
 	if len(w.Players) > 0 {
 		addedField := false
 
-		for i, p1 := range w.Players {
+		for j, p1 := range w.Players {
 			var newBytes []byte
 
 			if !compareTo.Initialized {
@@ -119,7 +119,7 @@ func (w *World) Packet(uuid uint32, compareTo *World) []*packet.Packet {
 			// Player prefix + player ID
 			if !addedField && len(newBytes) > 0 {
 				addedField = true
-				packets[i].AddFieldBytes(byte('A'), i)
+				packets[i].AddFieldBytes(byte('A'), j)
 			}
 
 			packets[i].AddField(&newBytes)
