@@ -58,8 +58,7 @@ func WorldSimulation() {
 
 		// Broadcast the snapshot to players
 		for _, player := range players {
-			player.Send(save.Packet(worldSnapshotId-1,
-				player.LastAcknowledged)...)
+			player.Send(save.Packet(worldSnapshotId-1, player)...)
 		}
 
 		// Check if the calculation took more than the tick rate value
@@ -77,7 +76,7 @@ func WorldSimulation() {
 	}
 }
 
-func (w *World) Packet(uuid uint32, compareTo *World) []*packet.Packet {
+func (w *World) Packet(uuid uint32, receiver *Player) []*packet.Packet {
 	packets, i := make([]*packet.Packet, 1), 0
 	packets[i] = packet.New(0x04)
 
@@ -90,14 +89,19 @@ func (w *World) Packet(uuid uint32, compareTo *World) []*packet.Packet {
 		addedField := false
 
 		for j, p1 := range w.Players {
+			// Do not send the player if he is the receiver
+			if p1.Account == receiver.Account {
+				continue
+			}
+
 			var newBytes []byte
 
-			if !compareTo.Initialized {
+			if !receiver.LastAcknowledged.Initialized {
 				newBytes = makePlayerPacket(p1, &Player{})
 			} else {
 				// Search for player's previous state in the other world
 				playerExists := false
-				for _, p2 := range compareTo.Players {
+				for _, p2 := range receiver.LastAcknowledged.Players {
 					if p1.Address.String() == p2.Address.String() {
 						playerExists = true
 						newBytes = makePlayerPacket(p1, p2)
@@ -164,9 +168,10 @@ func makePlayerPacket(p1, p2 *Player) []byte {
 			buf.Write([]byte(fieldValue1.(string)))
 		case "float32":
 			binary.Write(buf, binary.LittleEndian, fieldValue1.(float32))
-		case "byte":
+		case "byte", "uint8":
 			buf.WriteByte(fieldValue1.(byte))
 		default:
+			log.Info(fieldType.Type.String(), fieldType.Name)
 			log.Panic("Unknown data type encountered when encoding broadcast packet!")
 		}
 	}
