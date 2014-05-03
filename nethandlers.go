@@ -17,6 +17,7 @@ func SetupHandlers() {
 	Handle(0x03, HandleChatPacket)
 	Handle(0x04, HandleAcknowledgementPacket)
 	Handle(0x05, HandleMovementPacket)
+	Handle(0x07, HandleInformationChangePacket)
 }
 
 func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
@@ -231,4 +232,36 @@ func HandleMovementPacket(h *PacketHandler, p *packet.Packet) {
 		}
 	}
 	player.LastUpdate = time.Now()
+}
+
+// HandleInformationChangePacket (0x07) is a packet for small information
+// changes that does not desserve to be present in a move event
+func HandleInformationChangePacket(h *PacketHandler, p *packet.Packet) {
+	player, err := h.GetPlayer()
+	if err != nil || len(p.Data) != 3 {
+		h.Error()
+		return
+	}
+	// Read packet data
+	weapon, err := p.GetField(0, 1)
+	if err != nil {
+		h.Error()
+		return
+	}
+	model, err := p.GetField(1, 1)
+	if err != nil {
+		h.Error()
+		return
+	}
+	refreshByte, err := p.GetField(2, 1)
+	if err != nil {
+		h.Error()
+		return
+	}
+	// Update player
+	player.CurrentWeapon = (*weapon)[0]
+	player.ModelId = (*model)[0]
+	if (*refreshByte)[0] != 0 {
+		player.RefreshName()
+	}
 }
