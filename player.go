@@ -35,8 +35,8 @@ type Player struct {
 	AngularVelocityY float32 `prefix:"V"`
 
 	// Misc values
-	ModelId       string `prefix:"M"`
-	CurrentWeapon byte   `prefix:"W"`
+	ModelId       byte `prefix:"M"`
+	CurrentWeapon byte `prefix:"W"`
 
 	LastUpdate       time.Time
 	LastAcknowledged *World
