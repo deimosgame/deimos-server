@@ -50,6 +50,7 @@ func HandleClient(conn *net.UDPConn) {
 		n, addr, err := conn.ReadFromUDP(buf[0:])
 		if err != nil {
 			log.Warn("Had trouble receiving an UDP packet!")
+			continue
 		}
 
 		packetData := buf[:n]
