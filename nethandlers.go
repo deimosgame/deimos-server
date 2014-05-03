@@ -89,6 +89,13 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 		h.Error()
 		return
 	}
+	// Check if the account is not already used
+	for _, player := range players {
+		if player.Account == *userId {
+			h.Error()
+			return
+		}
+	}
 	token, err := p.GetFieldString(len(*userId) + 1)
 	if err != nil {
 		h.Error()
