@@ -164,6 +164,10 @@ func makePlayerPacket(p1, p2 *Player) []byte {
 			buf.Write([]byte(fieldValue1.(string)))
 		case "float32":
 			binary.Write(buf, binary.LittleEndian, fieldValue1.(float32))
+		case "byte":
+			buf.WriteByte(fieldValue1.(byte))
+		default:
+			log.Panic("Unknown data type encountered when encoding broadcast packet!")
 		}
 	}
 	return buf.Bytes()
