@@ -58,7 +58,8 @@ func WorldSimulation() {
 
 		// Broadcast the snapshot to players
 		for _, player := range players {
-			player.Send(save.Packet(worldSnapshotId-1, player)...)
+			p := save.Packet(worldSnapshotId-1, player)
+			player.Send(p...)
 		}
 
 		// Check if the calculation took more than the tick rate value
@@ -86,8 +87,6 @@ func (w *World) Packet(uuid uint32, receiver *Player) []*packet.Packet {
 	packets[i].AddField(&bufBytes)
 
 	if len(w.Players) > 0 {
-		addedField := false
-
 		for j, p1 := range w.Players {
 			// Do not send the player if he is the receiver
 			if p1.Account == receiver.Account {
@@ -97,20 +96,20 @@ func (w *World) Packet(uuid uint32, receiver *Player) []*packet.Packet {
 			var newBytes []byte
 
 			if !receiver.LastAcknowledged.Initialized {
-				newBytes = makePlayerPacket(p1, &Player{})
+				newBytes = makePlayerPacket(j, p1, &Player{})
 			} else {
 				// Search for player's previous state in the other world
 				playerExists := false
 				for _, p2 := range receiver.LastAcknowledged.Players {
 					if p1.Address.String() == p2.Address.String() {
 						playerExists = true
-						newBytes = makePlayerPacket(p1, p2)
+						newBytes = makePlayerPacket(j, p1, p2)
 						break
 					}
 				}
 
 				if !playerExists {
-					newBytes = makePlayerPacket(p1, &Player{})
+					newBytes = makePlayerPacket(j, p1, &Player{})
 				}
 			}
 
@@ -118,12 +117,6 @@ func (w *World) Packet(uuid uint32, receiver *Player) []*packet.Packet {
 			if len(packets[i].Data)+len(newBytes)+2 > packet.PacketSize {
 				packets = append(packets, packet.New(0x04))
 				i++
-			}
-
-			// Player prefix + player ID
-			if !addedField && len(newBytes) > 0 {
-				addedField = true
-				packets[i].AddFieldBytes(byte('A'), j)
 			}
 
 			packets[i].AddField(&newBytes)
@@ -134,7 +127,7 @@ func (w *World) Packet(uuid uint32, receiver *Player) []*packet.Packet {
 
 // makePlayerPacket creates a player element in the world packet based on
 // another player (p2 can be empty player)
-func makePlayerPacket(p1, p2 *Player) []byte {
+func makePlayerPacket(id byte, p1, p2 *Player) []byte {
 	buf := bytes.NewBuffer(nil)
 
 	val := reflect.ValueOf(p1).Elem()
@@ -160,6 +153,9 @@ func makePlayerPacket(p1, p2 *Player) []byte {
 				continue
 			}
 		}
+
+		buf.WriteByte(byte('A'))
+		buf.WriteByte(id)
 
 		// Write new data to packet
 		buf.Write(prefix)

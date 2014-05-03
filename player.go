@@ -12,7 +12,7 @@ import (
 )
 
 type Player struct {
-	Name    string `prefix:"N"`
+	Name    string
 	Account string
 	Address *net.UDPAddr
 
