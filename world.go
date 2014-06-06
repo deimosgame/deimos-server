@@ -154,14 +154,14 @@ func makePlayerPacket(id byte, p1, p2 *Player) []byte {
 			}
 		}
 
-		buf.WriteByte(byte('A'))
-		buf.WriteByte(id)
+		buf.Write([]byte{byte('A'), id})
 
 		// Write new data to packet
 		buf.Write(prefix)
 		switch fieldType.Type.String() {
 		case "string":
 			buf.Write([]byte(fieldValue1.(string)))
+			buf.WriteByte(0x00)
 		case "float32":
 			binary.Write(buf, binary.LittleEndian, fieldValue1.(float32))
 		case "byte", "uint8":
