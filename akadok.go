@@ -1,9 +1,10 @@
 package main
 
 import (
-	"bitbucket.org/deimosgame/go-akadok/util"
 	"os"
 	"time"
+
+	"bitbucket.org/deimosgame/go-akadok/util"
 )
 
 const (
@@ -34,12 +35,10 @@ var (
 )
 
 func main() {
-	// temp inititalization
-	currentMap = "coolmap"
-
 	/* Config loading */
 
 	LoadConfig()
+	currentMap = config.Maps[0]
 
 	/* Logging engine */
 
