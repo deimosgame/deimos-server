@@ -63,7 +63,7 @@ func HandleClient(conn *net.UDPConn) {
 		log.Debug(strconv.Itoa(int(p.Id)), string(p.Data))
 
 		if p.IsSplitted() {
-			// TODO: stack splitted packets
+			// TODO: stack splitted packets (maybe one day)
 		}
 
 		CheckHandler(addr, p)

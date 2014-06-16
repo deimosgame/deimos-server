@@ -12,8 +12,7 @@ func CommandParser() {
 	for {
 		line, _, err := input.ReadLine()
 		if err != nil {
-			log.Error("Command parsing error")
-			continue
+			HandleStopCommand([]string{})
 		}
 		commandLine := string(line)
 		splittedLine := strings.Split(commandLine, " ")
