@@ -19,7 +19,7 @@ var (
 		Host:           net.IPv4(0, 0, 0, 0),
 		Port:           1518,
 		MaxPlayers:     16,
-		Maps:           []string{"map1", "map2", "map3"},
+		Maps:           []string{"d_compound"},
 		Verbose:        false,
 		LogFile:        "server.log",
 		AutoInsecure:   false,
