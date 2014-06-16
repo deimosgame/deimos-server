@@ -83,6 +83,7 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 		h.Error()
 		return
 	}
+
 	// Retrive fields for the connection
 	userId, err := p.GetFieldString(0)
 	if err != nil {
@@ -101,6 +102,7 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 		h.Error()
 		return
 	}
+
 	// Check the credentials of the user
 	validToken, err := CheckToken(*userId, *token)
 	if err != nil {
@@ -114,6 +116,7 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 		h.Answer(outPacket)
 		return
 	}
+
 	// Create a player
 	newPlayer := Player{
 		Account:          string(*userId),
