@@ -14,7 +14,7 @@ func TestNewPacket(t *testing.T) {
 
 func TestReadPacket(t *testing.T) {
 	// Valid packet
-	validPacket := []byte{11, 0, 0, 0, 1, 2, 3, 0, 4, 5, 6}
+	validPacket := []byte{12, 0, 0, 0, 1, 2, 3, 0, 4, 5, 6}
 	if _, err := ReadPacket(&validPacket); err != nil {
 		t.Fail()
 	}
@@ -85,7 +85,7 @@ func TestGetField(t *testing.T) {
 }
 
 func TestEncode(t *testing.T) {
-	expectedPacketContents := []byte{10, 0, 0, 0, 1, 2, 3, 4, 5, 6}
+	expectedPacketContents := []byte{12, 0, 0, 0, 1, 2, 3, 4, 5, 6}
 
 	packet := New(0)
 	packet.AddFieldBytes(1, 2, 3)
