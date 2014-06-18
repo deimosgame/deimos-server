@@ -45,14 +45,16 @@ func main() {
 	InitLogging()
 
 	log.Notice("Akadok is loading...")
+	//log.DebugMode = true
 
 	/* Server IP resolving */
 
 	ResolveIP()
 
-	/* Setup handlers for incoming packets */
+	/* Setup handlers for incoming packets and commands */
 
 	SetupPacketHandlers()
+	SetupCommandHandlers()
 
 	/**
 	 *  Sub-routines permanently executed (in goroutines)
