@@ -125,7 +125,7 @@ func (p *Player) Remove() {
 	for i, player := range players {
 		if player.Address.String() == p.Address.String() {
 			delete(players, i)
-			return
+			break
 		}
 	}
 	UpdatePlayerList()
