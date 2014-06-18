@@ -10,7 +10,7 @@ import (
 )
 
 // SetupHandlers contains the handlers for each packet ID
-func SetupHandlers() {
+func SetupPacketHandlers() {
 	RegisterPacketHandler(0x00, HandleHandshakePacket)
 	RegisterPacketHandler(0x01, HandleClientConnectionPacket)
 	RegisterPacketHandler(0x02, HandleDisconnectionPacket)

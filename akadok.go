@@ -52,7 +52,7 @@ func main() {
 
 	/* Setup handlers for incoming packets */
 
-	SetupHandlers()
+	SetupPacketHandlers()
 
 	/**
 	 *  Sub-routines permanently executed (in goroutines)
