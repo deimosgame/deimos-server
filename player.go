@@ -17,8 +17,9 @@ type Player struct {
 	Address *net.UDPAddr
 
 	// Gameplay values
-	Score    byte `prefix:"L"`
-	Instance string
+	LifeState byte `prefix:"A"`
+	Score     byte `prefix:"L"`
+	Instance  string
 
 	// Position
 	X float32 `prefix:"X"`

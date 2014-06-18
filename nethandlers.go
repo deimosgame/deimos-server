@@ -248,7 +248,7 @@ func HandleMovementPacket(h *PacketHandler, p *packet.Packet) {
 // changes that does not desserve to be present in a move event
 func HandleInformationChangePacket(h *PacketHandler, p *packet.Packet) {
 	player, err := h.GetPlayer()
-	if err != nil || len(p.Data) != 3 {
+	if err != nil || len(p.Data) != 4 {
 		h.Error()
 		return
 	}
@@ -268,9 +268,15 @@ func HandleInformationChangePacket(h *PacketHandler, p *packet.Packet) {
 		h.Error()
 		return
 	}
+	lifeState, err := p.GetField(3, 1)
+	if err != nil {
+		h.Error()
+		return
+	}
 	// Update player
 	player.CurrentWeapon = (*weapon)[0]
 	player.ModelId = (*model)[0]
+	player.LifeState = (*lifeState)[0] == 1
 	if (*refreshByte)[0] != 0 {
 		player.RefreshName()
 	}
