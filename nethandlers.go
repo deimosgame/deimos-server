@@ -276,7 +276,7 @@ func HandleInformationChangePacket(h *PacketHandler, p *packet.Packet) {
 	// Update player
 	player.CurrentWeapon = (*weapon)[0]
 	player.ModelId = (*model)[0]
-	player.LifeState = (*lifeState)[0] == 1
+	player.LifeState = (*lifeState)[0]
 	if (*refreshByte)[0] != 0 {
 		player.RefreshName()
 	}
