@@ -28,8 +28,15 @@ func ReadSinglePacket(packetBuffer *[]byte) (*Packet, error) {
 	}
 
 	// Checksum
-	packetChecksum := (*packetBuffer)[0]
-	if packetChecksum != byte(len(*packetBuffer)%256) {
+	computedChecksum := byte(0)
+	for i := 1; i < len(*packetBuffer); i++ {
+		currentByte := (*packetBuffer)[i]
+		for j := 0; currentByte > 0; j++ {
+			computedChecksum += byte(j%2+1) * (currentByte % 2)
+			currentByte = currentByte >> 1
+		}
+	}
+	if (*packetBuffer)[0] != computedChecksum {
 		return &Packet{}, errors.New("Invalid checksum (corrupted packet?)")
 	}
 
@@ -96,16 +103,27 @@ func (p *Packet) Encode() *[]*[]byte {
 	p.Data = p.Data[:len(p.Data)-i+1]
 
 	if len(p.Data) <= PacketSize-4 {
-		// Checksum
-		checksum := byte((len(p.Data) + 4) % 256)
-		// Buffer
+		// First buffer
 		buf := bytes.NewBuffer(nil)
-		buf.WriteByte(checksum)
 		buf.WriteByte(p.Id)
 		buf.WriteByte(p.Index)
 		buf.WriteByte(p.Total)
 		buf.Write(p.Data)
-		result := buf.Bytes()
+
+		// Checksum
+		checksum := byte(0)
+		for _, currentByte := range buf.Bytes() {
+			for j := 0; currentByte > 0; j++ {
+				checksum += byte(j%2+1) * (currentByte % 2)
+				currentByte = currentByte >> 1
+			}
+		}
+
+		// Final buffer
+		finalBuf := bytes.NewBuffer(nil)
+		finalBuf.WriteByte(checksum)
+		finalBuf.Write(buf.Bytes())
+		result := finalBuf.Bytes()
 		return &[]*[]byte{&result}
 	}
 	// Splitted packet
