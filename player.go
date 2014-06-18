@@ -76,6 +76,12 @@ func (p *Player) NextTick() {
 	p.LastUpdate = time.Now()
 }
 
+func (p *Player) SendMessage(message string) {
+	messagePacket := packet.New(0x03)
+	messagePacket.AddFieldString(&message)
+	p.Send(messagePacket)
+}
+
 // Kick kicks a player out of the server
 func (p *Player) Kick(reason string) {
 	if reason == "" {
