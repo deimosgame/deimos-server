@@ -86,6 +86,15 @@ func Println(out *log.Logger, color string, str ...string) {
 	out.Println(outBuffer.String())
 }
 
+// Formats allows output to be formatted, fmt-style
+func Format(format string, str ...string) string {
+	interfaceStr := make([]interface{}, len(str))
+	for i, currentStr := range str {
+		interfaceStr[i] = interface{}(currentStr)
+	}
+	return fmt.Sprintf(format, interfaceStr...)
+}
+
 func (l *Logger) Close() {
 	l.fileHandler.Close()
 	l.stdLogger = nil
@@ -151,6 +160,35 @@ func (l *Logger) Notice(str ...string) {
 func (l *Logger) Debug(str ...string) {
 	if l.DebugMode {
 		l.toStdOut("DEBUG", str...)
+	}
+}
+
+// More helper functions for color and formatting
+
+func (l *Logger) Infof(format string, str ...string) {
+	l.toStdOut("INFO", Format(format, str...))
+}
+
+func (l *Logger) Errorf(format string, str ...string) {
+	l.toStdErr("ERROR", Format(format, str...))
+}
+
+func (l *Logger) Panicf(format string, str ...string) {
+	l.Error(Format(format, str...))
+	os.Exit(1)
+}
+
+func (l *Logger) Warnf(format string, str ...string) {
+	l.toStdErr("WARN", Format(format, str...))
+}
+
+func (l *Logger) Noticef(format string, str ...string) {
+	l.toStdErr("NOTICE", Format(format, str...))
+}
+
+func (l *Logger) Debugf(format string, str ...string) {
+	if l.DebugMode {
+		l.toStdOut("DEBUG", Format(format, str...))
 	}
 }
 
