@@ -66,19 +66,19 @@ func HandleClient(conn *net.UDPConn) {
 			// TODO: stack splitted packets (maybe one day)
 		}
 
-		CheckHandler(addr, p)
+		UsePacketHandler(addr, p)
 	}
 }
 
-// Handler adds/edits a handler for a given packet type
+// RegisterPacketHandler adds/edits a handler for a given packet type
 // Handlers must have the following prototype:
 // (h *PacketHandler, packet *packet.Packet)
-func Handle(packetId byte, handler interface{}) {
+func RegisterPacketHandler(packetId byte, handler interface{}) {
 	Handlers[packetId] = handler
 }
 
-// RemoveHandler deletes a handler from the handler table
-func RemoveHandler(packetId byte) bool {
+// UnregisterPacketHandler deletes a handler from the handler table
+func UnregisterPacketHandler(packetId byte) bool {
 	if _, ok := Handlers[packetId]; !ok {
 		return false
 	}
@@ -87,7 +87,7 @@ func RemoveHandler(packetId byte) bool {
 }
 
 // CheckHandler tries to use a handler for packets
-func CheckHandler(origin *net.UDPAddr, p *packet.Packet) {
+func UsePacketHandler(origin *net.UDPAddr, p *packet.Packet) {
 	if handler, ok := Handlers[p.Id]; ok {
 		// Starts a new goroutine for the handler
 		go HandlePacket(handler, origin, p)

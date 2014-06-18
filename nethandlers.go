@@ -11,13 +11,13 @@ import (
 
 // SetupHandlers contains the handlers for each packet ID
 func SetupHandlers() {
-	Handle(0x00, HandleHandshakePacket)
-	Handle(0x01, HandleClientConnectionPacket)
-	Handle(0x02, HandleDisconnectionPacket)
-	Handle(0x03, HandleChatPacket)
-	Handle(0x04, HandleAcknowledgementPacket)
-	Handle(0x05, HandleMovementPacket)
-	Handle(0x07, HandleInformationChangePacket)
+	RegisterPacketHandler(0x00, HandleHandshakePacket)
+	RegisterPacketHandler(0x01, HandleClientConnectionPacket)
+	RegisterPacketHandler(0x02, HandleDisconnectionPacket)
+	RegisterPacketHandler(0x03, HandleChatPacket)
+	RegisterPacketHandler(0x04, HandleAcknowledgementPacket)
+	RegisterPacketHandler(0x05, HandleMovementPacket)
+	RegisterPacketHandler(0x07, HandleInformationChangePacket)
 }
 
 func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
