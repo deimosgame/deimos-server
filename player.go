@@ -54,11 +54,11 @@ func (p *Player) Match(name string) bool {
 // Send send multiple packets to a player
 func (p *Player) Send(packets ...*packet.Packet) {
 	for _, pkt := range packets {
-		message := OutboundMessage{
+		message := UDPOutboundMessage{
 			Address: p.Address,
 			Packet:  pkt,
 		}
-		networkInput <- &message
+		UdpNetworkInput <- &message
 	}
 }
 

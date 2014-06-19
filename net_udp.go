@@ -27,10 +27,10 @@ func UDPServer() {
 	}
 
 	// Starts the handler for inbound packets
-	go HandleClient(conn)
+	go UDPHandleClient(conn)
 	for {
 		select {
-		case m := <-networkInput:
+		case m := <-UdpNetworkInput:
 			encodedPackets := m.Packet.Encode()
 			for _, currentPacket := range *encodedPackets {
 				conn.WriteToUDP(*currentPacket, m.Address)

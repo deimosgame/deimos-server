@@ -23,8 +23,8 @@ var (
 	serverKeepupAlert = false
 	insecureAlert     = false
 
-	networkInput = make(chan *OutboundMessage)
-	tickRateSecs float32
+	UdpNetworkInput = make(chan *UDPOutboundMessage)
+	tickRateSecs    float32
 
 	// Game-related variables
 	currentMap      string
@@ -74,7 +74,7 @@ func main() {
 
 	/* Network routine start */
 
-	go Server()
+	go UDPServer()
 
 	/* Tadaaaa */
 

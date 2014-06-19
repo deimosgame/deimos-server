@@ -68,7 +68,7 @@ type PacketHandler struct {
 
 // Answer adds a packet to send to the network queue
 func (h *PacketHandler) Answer(p *packet.Packet) {
-	networkInput <- &OutboundMessage{
+	UdpNetworkInput <- &UDPOutboundMessage{
 		Address: h.Address,
 		Packet:  p,
 	}
