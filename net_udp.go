@@ -7,10 +7,6 @@ import (
 	"strconv"
 )
 
-var (
-	Handlers = make(map[byte]interface{})
-)
-
 type UDPOutboundMessage struct {
 	Address *net.UDPAddr
 	Packet  *packet.Packet

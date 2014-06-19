@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+var (
+	Handlers = make(map[byte]interface{})
+)
+
 // SetupHandlers contains the handlers for each packet ID
 func SetupPacketHandlers() {
 	RegisterPacketHandler(0x00, HandleHandshakePacket)
