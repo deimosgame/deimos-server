@@ -11,13 +11,13 @@ var (
 	Handlers = make(map[byte]interface{})
 )
 
-type OutboundMessage struct {
+type UDPOutboundMessage struct {
 	Address *net.UDPAddr
 	Packet  *packet.Packet
 }
 
 // Server is the main function of the server, which mainly handles outbound data
-func Server() {
+func UDPServer() {
 	service := ":" + strconv.Itoa(config.Port)
 	udpAddr, err := net.ResolveUDPAddr("udp4", service)
 	if err != nil {
@@ -44,7 +44,7 @@ func Server() {
 
 // HandleClient manages incoming packets and dispatches them to their respective
 // handlers
-func HandleClient(conn *net.UDPConn) {
+func UDPHandleClient(conn *net.UDPConn) {
 	for {
 		var buf [packet.PacketSize]byte
 
