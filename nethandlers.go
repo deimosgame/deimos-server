@@ -1,12 +1,13 @@
 package main
 
 import (
-	"bitbucket.org/deimosgame/go-akadok/packet"
 	"bytes"
 	"encoding/binary"
 	"errors"
 	"net"
 	"time"
+
+	"bitbucket.org/deimosgame/go-akadok/packet"
 )
 
 var (

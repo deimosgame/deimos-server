@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bitbucket.org/deimosgame/go-akadok/packet"
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
@@ -9,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"bitbucket.org/deimosgame/go-akadok/packet"
 )
 
 type Player struct {

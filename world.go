@@ -1,11 +1,12 @@
 package main
 
 import (
-	"bitbucket.org/deimosgame/go-akadok/packet"
 	"bytes"
 	"encoding/binary"
 	"reflect"
 	"time"
+
+	"bitbucket.org/deimosgame/go-akadok/packet"
 )
 
 type World struct {

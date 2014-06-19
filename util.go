@@ -1,13 +1,14 @@
 package main
 
 import (
-	"bitbucket.org/deimosgame/go-akadok/util"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"bitbucket.org/deimosgame/go-akadok/util"
 )
 
 // ResolveIP uses the util package to resolve server external IP address

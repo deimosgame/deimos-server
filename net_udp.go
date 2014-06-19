@@ -1,10 +1,11 @@
 package main
 
 import (
-	"bitbucket.org/deimosgame/go-akadok/packet"
 	"fmt"
 	"net"
 	"strconv"
+
+	"bitbucket.org/deimosgame/go-akadok/packet"
 )
 
 type UDPOutboundMessage struct {
