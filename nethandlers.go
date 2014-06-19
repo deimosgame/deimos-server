@@ -18,12 +18,39 @@ func SetupPacketHandlers() {
 	RegisterPacketHandler(0x04, HandleAcknowledgementPacket)
 	RegisterPacketHandler(0x05, HandleMovementPacket)
 	RegisterPacketHandler(0x07, HandleInformationChangePacket)
+	RegisterPacketHandler(0x08, HandleSoundPacket)
 }
 
 func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
 	h := PacketHandler{addr}
 	// Magic happens
 	(handler.(func(*PacketHandler, *packet.Packet)))(&h, p)
+}
+
+// RegisterPacketHandler adds/edits a handler for a given packet type
+// Handlers must have the following prototype:
+// (h *PacketHandler, packet *packet.Packet)
+func RegisterPacketHandler(packetId byte, handler interface{}) {
+	Handlers[packetId] = handler
+}
+
+// UnregisterPacketHandler deletes a handler from the handler table
+func UnregisterPacketHandler(packetId byte) bool {
+	if _, ok := Handlers[packetId]; !ok {
+		return false
+	}
+	delete(Handlers, packetId)
+	return true
+}
+
+// CheckHandler tries to use a handler for packets
+func UsePacketHandler(origin *net.UDPAddr, p *packet.Packet) {
+	if handler, ok := Handlers[p.Id]; ok {
+		// Starts a new goroutine for the handler
+		go HandlePacket(handler, origin, p)
+	} else {
+		log.Warn("An unknown packet has been received!")
+	}
 }
 
 /**
@@ -276,8 +303,20 @@ func HandleInformationChangePacket(h *PacketHandler, p *packet.Packet) {
 	// Update player
 	player.CurrentWeapon = (*weapon)[0]
 	player.ModelId = (*model)[0]
-	player.LifeState = (*lifeState)[0]
+
+	if player.LifeState != (*lifeState)[0] {
+		player.LifeState = (*lifeState)[0]
+		if (*lifeState)[0] == 0 {
+			log.Infof("%s died", player.Name)
+		}
+	}
+
 	if (*refreshByte)[0] != 0 {
 		player.RefreshName()
 	}
+}
+
+// HandleSoundPacket handles the sound packets emitted from players
+func HandleSoundPacket(h *PacketHandler, p *packet.Packet) {
+
 }

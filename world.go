@@ -173,3 +173,12 @@ func makePlayerPacket(id byte, p1, p2 *Player) []byte {
 	}
 	return buf.Bytes()
 }
+
+// SendMessage messages all players on the server
+func SendMessage(message string) {
+	messagePacket := packet.New(0x03)
+	messagePacket.AddFieldString(&message)
+	for _, currentPlayer := range players {
+		currentPlayer.Send(messagePacket)
+	}
+}

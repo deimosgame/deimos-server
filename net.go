@@ -2,6 +2,7 @@ package main
 
 import (
 	"bitbucket.org/deimosgame/go-akadok/packet"
+	"fmt"
 	"net"
 	"strconv"
 )
@@ -49,6 +50,7 @@ func HandleClient(conn *net.UDPConn) {
 
 		n, addr, err := conn.ReadFromUDP(buf[0:])
 		if err != nil {
+			fmt.Println(err)
 			log.Warn("Had trouble receiving an UDP packet!")
 			continue
 		}
@@ -67,40 +69,5 @@ func HandleClient(conn *net.UDPConn) {
 		}
 
 		UsePacketHandler(addr, p)
-	}
-}
-
-// RegisterPacketHandler adds/edits a handler for a given packet type
-// Handlers must have the following prototype:
-// (h *PacketHandler, packet *packet.Packet)
-func RegisterPacketHandler(packetId byte, handler interface{}) {
-	Handlers[packetId] = handler
-}
-
-// UnregisterPacketHandler deletes a handler from the handler table
-func UnregisterPacketHandler(packetId byte) bool {
-	if _, ok := Handlers[packetId]; !ok {
-		return false
-	}
-	delete(Handlers, packetId)
-	return true
-}
-
-// CheckHandler tries to use a handler for packets
-func UsePacketHandler(origin *net.UDPAddr, p *packet.Packet) {
-	if handler, ok := Handlers[p.Id]; ok {
-		// Starts a new goroutine for the handler
-		go HandlePacket(handler, origin, p)
-	} else {
-		log.Warn("An unknown packet has been received!")
-	}
-}
-
-// SendMessage messages all players on the server
-func SendMessage(message string) {
-	messagePacket := packet.New(0x03)
-	messagePacket.AddFieldString(&message)
-	for _, currentPlayer := range players {
-		currentPlayer.Send(messagePacket)
 	}
 }
