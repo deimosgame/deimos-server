@@ -6,18 +6,22 @@ import (
 )
 
 const (
-	PacketSize = 576
+	PacketSize    = 576
+	PacketTypeTCP = iota
+	PacketTypeUDP
 )
 
 type Packet struct {
+	Type             byte
 	Id, Index, Total byte
 	Data             []byte
 }
 
-// New creates an empty packet with its id
-func New(id byte) *Packet {
+// New creates an empty packet with its id and its type (TCP/UDP)
+func New(t, id byte) *Packet {
 	return &Packet{
-		Id: id,
+		Type: t,
+		Id:   id,
 	}
 }
 
