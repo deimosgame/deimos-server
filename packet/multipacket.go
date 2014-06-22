@@ -7,7 +7,7 @@ import (
 
 // ReadPacket arranges and reads multiple packets of the same type at once,
 // resulting in one large packet
-func ReadPacket(receivedPackets ...*[]byte) (*Packet, error) {
+func ReadPacket(receivedPackets ...[]byte) (*Packet, error) {
 	packetCount := len(receivedPackets)
 
 	if packetCount > 255 {
@@ -42,9 +42,9 @@ func (p *Packet) IsSplitted() bool {
 }
 
 // IsSplitted checks if a raw packet is splitted
-func IsSplitted(p *[]byte) (byte, error) {
-	if len(*p) < 4 {
+func IsSplitted(p []byte) (byte, error) {
+	if len(p) < 4 {
 		return 0, errors.New("Invalid packet")
 	}
-	return (*p)[3], nil
+	return (p)[3], nil
 }

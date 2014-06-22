@@ -26,37 +26,37 @@ func New(t, id byte) *Packet {
 }
 
 // ReadPacket reads a byte array contents and tries to parse it as a packet
-func ReadSinglePacket(packetBuffer *[]byte) (*Packet, error) {
-	if len(*packetBuffer) < 3 {
+func ReadSinglePacket(packetBuffer []byte) (*Packet, error) {
+	if len(packetBuffer) < 3 {
 		return &Packet{}, errors.New("Invalid packet!")
 	}
 
 	// Checksum
 	computedChecksum := byte(0)
-	for i := 1; i < len(*packetBuffer); i++ {
-		currentByte := (*packetBuffer)[i]
+	for i := 1; i < len(packetBuffer); i++ {
+		currentByte := (packetBuffer)[i]
 		for j := 0; currentByte > 0; j++ {
 			computedChecksum += currentByte % 2 << uint(j%2)
 			currentByte = currentByte >> 1
 		}
 	}
-	if (*packetBuffer)[0] != computedChecksum {
+	if packetBuffer[0] != computedChecksum {
 		return &Packet{}, errors.New("Invalid checksum (corrupted packet?)")
 	}
 
 	packet := &Packet{
-		Id:    (*packetBuffer)[1],
-		Index: (*packetBuffer)[2],
-		Total: (*packetBuffer)[3],
-		Data:  (*packetBuffer)[4:],
+		Id:    packetBuffer[1],
+		Index: packetBuffer[2],
+		Total: packetBuffer[3],
+		Data:  packetBuffer[4:],
 	}
 	return packet, nil
 }
 
 // AddField adds a new field at the end of the current packet
-func (p *Packet) AddField(fieldData *[]byte) error {
+func (p *Packet) AddField(fieldData []byte) error {
 	packetBuffer := bytes.NewBuffer(p.Data)
-	if _, err := packetBuffer.Write(*fieldData); err != nil {
+	if _, err := packetBuffer.Write(fieldData); err != nil {
 		return err
 	}
 	p.Data = packetBuffer.Bytes()
@@ -65,28 +65,27 @@ func (p *Packet) AddField(fieldData *[]byte) error {
 
 // AddFieldBytes is an alias for AddField, except it doesn't needs an array
 func (p *Packet) AddFieldBytes(b ...byte) {
-	p.AddField(&b)
+	p.AddField(b)
 }
 
 // AddFieldString adds a string to a packet
-func (p *Packet) AddFieldString(s *string) {
-	data := append([]byte(*s), 0)
-	p.AddField(&data)
+func (p *Packet) AddFieldString(s string) {
+	data := append([]byte(s), 0)
+	p.AddField(data)
 }
 
-func (p *Packet) GetField(index, length int) (*[]byte, error) {
+func (p *Packet) GetField(index, length int) ([]byte, error) {
 	if index+length > len(p.Data) {
-		return &[]byte{}, errors.New("Data too long")
+		return []byte{}, errors.New("Data too long")
 	}
 	data := p.Data[index : index+length]
-	return &data, nil
+	return data, nil
 }
 
 // GetField returns the value of a field using its index
-func (p *Packet) GetFieldString(index int) (*string, error) {
+func (p *Packet) GetFieldString(index int) (string, error) {
 	if index > len(p.Data) {
-		s := ""
-		return &s, errors.New("Unknown index")
+		return "", errors.New("Unknown index")
 	}
 	j := index
 	for ; j < len(p.Data); j++ {
@@ -95,12 +94,12 @@ func (p *Packet) GetFieldString(index int) (*string, error) {
 		}
 	}
 	field := string(p.Data[index:j])
-	return &field, nil
+	return field, nil
 }
 
 // Encode encodes the packets to a byte array in order to send it on the network
-func (p *Packet) Encode() *[]*[]byte {
-	// Remove the last \00 if necessary
+func (p *Packet) Encode() [][]byte {
+	// Remove the last \00 elements if necessary
 	i := 1
 	for ; i <= len(p.Data) && p.Data[len(p.Data)-i] == 0; i++ {
 	}
@@ -128,11 +127,11 @@ func (p *Packet) Encode() *[]*[]byte {
 		finalBuf.WriteByte(checksum)
 		finalBuf.Write(buf.Bytes())
 		result := finalBuf.Bytes()
-		return &[]*[]byte{&result}
+		return [][]byte{result}
 	}
 	// Splitted packet
 	packetCount := len(p.Data)/(PacketSize-4) + 1
-	packets := make([]*[]byte, packetCount)
+	packets := make([][]byte, packetCount)
 	for i := 0; i < packetCount; i++ {
 		currentPacketLen := PacketSize - 4
 		if len(p.Data)-i*(PacketSize-4) < PacketSize-4 {
@@ -144,7 +143,7 @@ func (p *Packet) Encode() *[]*[]byte {
 			Total: byte(packetCount),
 			Data:  p.Data[i*(PacketSize-4) : currentPacketLen],
 		}
-		packets[i] = (*currentPacket.Encode())[0]
+		packets[i] = currentPacket.Encode()[0]
 	}
-	return &packets
+	return packets
 }
