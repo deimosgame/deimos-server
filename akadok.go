@@ -8,10 +8,11 @@ import (
 )
 
 const (
-	ProtocolVersion   = byte(1)
-	MasterServer      = "https://akadok.deimos-ga.me"
-	HeartbeatInterval = 15 * time.Second
-	BroadcastInterval = 20 * time.Millisecond
+	ProtocolVersion    = byte(1)
+	MasterServer       = "https://akadok.deimos-ga.me"
+	HeartbeatInterval  = 15 * time.Second
+	BroadcastInterval  = 20 * time.Millisecond
+	NetworkChannelSize = 10
 )
 
 var (
@@ -23,7 +24,7 @@ var (
 	serverKeepupAlert = false
 	insecureAlert     = false
 
-	UdpNetworkInput = make(chan *UDPOutboundMessage)
+	UdpNetworkInput = make(chan *UDPOutboundMessage, NetworkChannelSize)
 	tickRateSecs    float32
 
 	// Game-related variables
