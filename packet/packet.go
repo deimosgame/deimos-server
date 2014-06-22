@@ -36,7 +36,7 @@ func ReadSinglePacket(packetBuffer *[]byte) (*Packet, error) {
 	for i := 1; i < len(*packetBuffer); i++ {
 		currentByte := (*packetBuffer)[i]
 		for j := 0; currentByte > 0; j++ {
-			computedChecksum += byte(j%2+1) * (currentByte % 2)
+			computedChecksum += currentByte % 2 << uint(j%2)
 			currentByte = currentByte >> 1
 		}
 	}
@@ -118,7 +118,7 @@ func (p *Packet) Encode() *[]*[]byte {
 		checksum := byte(0)
 		for _, currentByte := range buf.Bytes() {
 			for j := 0; currentByte > 0; j++ {
-				checksum += byte(j%2+1) * (currentByte % 2)
+				checksum += currentByte % 2 << uint(j%2)
 				currentByte = currentByte >> 1
 			}
 		}
