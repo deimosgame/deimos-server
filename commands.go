@@ -31,6 +31,9 @@ func SetupCommandHandlers() {
 	RegisterCommandHandler("stop", HandleStopCommand)
 	RegisterCommandHandler("kick", HandleKickCommand)
 	RegisterCommandHandler("config", HandleConfigCommand)
+	RegisterCommandHandler("send", HandleSendCommand)
+	RegisterCommandHandler("op", HandleOpCommand)
+	RegisterCommandHandler("deop", HandleDeopCommand)
 }
 
 // RegisterCommandHandler saves command handlers into a dedicated map
@@ -110,11 +113,9 @@ Usage: kick <*|player> [reason]`
 		reason = reason[1:]
 	}
 
-	for _, currentPlayer := range players {
-		if currentPlayer.Match(args[0]) {
-			currentPlayer.Kick(reason)
-			return "Kicked " + currentPlayer.Name
-		}
+	for _, currentPlayer := range MatchPlayers(args[0]) {
+		currentPlayer.Kick(reason)
+		return "Kicked " + currentPlayer.Name
 	}
 	return "Couldn't find " + args[0] + "."
 }
@@ -135,4 +136,59 @@ func HandleStopCommand(args []string, p *Player) string {
 
 	Stop(reason)
 	return ""
+}
+
+// HanldeSendCommand handles /send, which displays a message as the following:
+//  > [message]
+//  It is used mainly by the console to comunicate with players
+func HandleSendCommand(args []string, p *Player) string {
+	SendMessage("> " + strings.Join(args, " "))
+	return ""
+}
+
+func HandleOpCommand(args []string, p *Player) string {
+	if len(args) != 1 {
+		return `Invalid command arguments.
+Usage: /op <player>`
+	}
+	players := MatchPlayers(args[0])
+	if len(players) == 0 {
+		return "No corresponding player has been found"
+	}
+	if len(players) > 1 {
+		return `Your search has matched more than one player.
+Please specify a single player for safety reasons.`
+	}
+	config.Operators = append(config.Operators, players[0].Account)
+	players[0].SendMessage("You are now a server operator.")
+	return players[0].Name + " has been granted operator powers."
+}
+
+func HandleDeopCommand(args []string, p *Player) string {
+	if len(args) != 1 {
+		return `Invalid command arguments.
+Usage: /deop <player>`
+	}
+	players := MatchPlayers(args[0])
+	if len(players) == 0 {
+		return "No corresponding player has been found"
+	}
+	if len(players) > 1 {
+		return `Your search has matched more than one player.
+Please specify a single player for safety reasons.`
+	}
+	if !players[0].IsOperator() {
+		return players[0].Name + " is not currently an operator."
+	}
+	newOperators := make([]string, 0)
+	for _, currentOperator := range config.Operators {
+		if strings.ToLower(currentOperator) ==
+			strings.ToLower(players[0].Account) {
+			continue
+		}
+		newOperators = append(newOperators, currentOperator)
+	}
+	config.Operators = newOperators
+	players[0].SendMessage("You are not a server operator anymore.")
+	return players[0].Name + " has lost his operator powers."
 }
