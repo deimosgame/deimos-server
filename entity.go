@@ -5,6 +5,8 @@ import (
 )
 
 type Entity struct {
+	UUID string
+
 	// Position
 	X float32
 	Y float32
@@ -26,6 +28,7 @@ type Entity struct {
 	LastUpdate time.Time
 }
 
+// NextTick computes the state of the entity at the world's next tick
 func (e *Entity) NextTick() {
 	if time.Since(e.LastUpdate) < time.Millisecond*15 {
 		return

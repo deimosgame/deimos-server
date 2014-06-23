@@ -78,6 +78,8 @@ func WorldSimulation() {
 	}
 }
 
+// Packet generates packets used to broadcast the world state to specific
+// players
 func (w *World) Packet(uuid uint32, receiver *Player) []*packet.Packet {
 	packets, i := make([]*packet.Packet, 1), 0
 	packets[i] = packet.New(packet.PacketTypeUDP, 0x04)

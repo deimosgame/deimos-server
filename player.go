@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -80,6 +81,7 @@ func MatchPlayers(name string) []*Player {
 
 // Match checks if a player name begins with a specific expression
 func (p *Player) Match(name string) bool {
+	fmt.Println(p.Name, len(name))
 	return strings.ToLower(p.Name[:len(name)]) == strings.ToLower(name) ||
 		name == "*"
 }
@@ -112,6 +114,7 @@ func (p *Player) NextTick() {
 	p.LastUpdate = time.Now()
 }
 
+// SendMessage sends a message to a single player
 func (p *Player) SendMessage(message string) {
 	messagePacket := packet.New(packet.PacketTypeUDP, 0x03)
 	messagePacket.AddFieldString(message)

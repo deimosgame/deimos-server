@@ -78,6 +78,7 @@ func TCPHandleClient(conn *net.Conn) {
 	}
 }
 
+// TCPHandleClientSend
 func TCPHandleClientSend(conn *net.Conn, player *Player) {
 	for {
 		m, ok := <-player.TCPNetworkInput
