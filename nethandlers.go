@@ -23,9 +23,14 @@ func SetupPacketHandlers() {
 	RegisterPacketHandler(0x04, HandleAcknowledgementPacket)
 	RegisterPacketHandler(0x05, HandleMovementPacket)
 	RegisterPacketHandler(0x07, HandleInformationChangePacket)
-	RegisterPacketHandler(0x08, HandleSoundPacket)
+
+	// Bouncing packets
+	RegisterPacketHandler(0x08, HandleBounce(packet.PacketTypeUDP))
+	RegisterPacketHandler(0x0B, HandleBounce(packet.PacketTypeTCP))
 }
 
+// HandlePacket bootstraps the handler goroutine with useful information such
+// as the PacketHandler object and the packet in itself
 func HandlePacket(handler interface{}, addr *Address, p *packet.Packet,
 	player *Player) {
 	h := &PacketHandler{Address: addr}
@@ -99,6 +104,19 @@ func (h *PacketHandler) GetPlayer() (*Player, error) {
 		}
 	}
 	return nil, errors.New("Unknown player")
+}
+
+// HandleBounce manages bouncing packets to all players, except the sender
+func HandleBounce(packetType byte) func(h *PacketHandler, p *packet.Packet) {
+	return func(h *PacketHandler, p *packet.Packet) {
+		p.Type = packetType
+		for _, currentPlayer := range players {
+			if currentPlayer.Equals(h.Player) {
+				continue
+			}
+			currentPlayer.Send(p)
+		}
+	}
 }
 
 /**
@@ -346,16 +364,5 @@ func HandleInformationChangePacket(h *PacketHandler, p *packet.Packet) {
 
 	if refreshByte[0] != 0 {
 		player.RefreshName()
-	}
-}
-
-// HandleSoundPacket handles the sound packets emitted from players
-func HandleSoundPacket(h *PacketHandler, p *packet.Packet) {
-	p.Type = packet.PacketTypeUDP
-	for _, currentPlayer := range players {
-		if currentPlayer.Equals(h.Player) {
-			continue
-		}
-		currentPlayer.Send(p)
 	}
 }
