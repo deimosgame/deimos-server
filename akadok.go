@@ -76,6 +76,7 @@ func main() {
 	/* Network routine start */
 
 	go UDPServer()
+	go TCPServer()
 
 	/* Tadaaaa */
 

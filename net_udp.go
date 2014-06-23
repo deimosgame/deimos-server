@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"strconv"
 
@@ -9,7 +8,7 @@ import (
 )
 
 type UDPOutboundMessage struct {
-	Address *net.UDPAddr
+	Address *Address
 	Packet  *packet.Packet
 }
 
@@ -31,9 +30,8 @@ func UDPServer() {
 	for {
 		select {
 		case m := <-UdpNetworkInput:
-			encodedPackets := m.Packet.Encode()
-			for _, currentPacket := range *encodedPackets {
-				conn.WriteToUDP(*currentPacket, m.Address)
+			for _, currentPacket := range m.Packet.Encode() {
+				conn.WriteToUDP(currentPacket, m.Address.UDPAddr)
 			}
 		}
 	}
@@ -47,24 +45,26 @@ func UDPHandleClient(conn *net.UDPConn) {
 
 		n, addr, err := conn.ReadFromUDP(buf[0:])
 		if err != nil {
-			fmt.Println(err)
-			log.Warn("Had trouble receiving an UDP packet!")
+			log.Debug("Had trouble receiving an UDP packet!", err.Error())
 			continue
 		}
 
 		packetData := buf[:n]
-		p, err := packet.ReadPacket(&packetData)
+		p, err := packet.ReadPacket(packetData)
 
 		if err != nil {
-			log.Warn("Corrupted packet received!")
+			log.Warn("Corrupted UDP packet received!")
 			continue
 		}
+		p.Type = packet.PacketTypeUDP
 		log.Debug(strconv.Itoa(int(p.Id)), string(p.Data))
 
 		if p.IsSplitted() {
 			// TODO: stack splitted packets (maybe one day)
 		}
 
-		UsePacketHandler(addr, p)
+		UsePacketHandler(&Address{
+			UDPAddr: addr,
+		}, p, nil)
 	}
 }

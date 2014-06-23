@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 type Player struct {
 	Name    string
 	Account string
-	Address *net.UDPAddr
+	Address *Address
 
 	// Gameplay values
 	LifeState byte `prefix:"A"`
@@ -42,23 +43,56 @@ type Player struct {
 
 	LastUpdate       time.Time
 	LastAcknowledged *World
+	TCPNetworkInput  chan *packet.Packet
 	Initialized      bool
 }
 
-// MatchName checks if a player name begins with a specific expression
+// MatchByUDPAddress tries to match an UDP address with the player using it
+func MatchByUDPAddress(addr *net.UDPAddr) (*Player, error) {
+	for _, player := range players {
+		if player.Address.UDPAddr.String() == addr.String() {
+			return player, nil
+		}
+	}
+	return nil, errors.New("Player not found")
+}
+
+// MatchByTCPAddress tries to match a TCP address with the player using it
+func MatchByTCPAddress(addr *net.TCPAddr) (*Player, error) {
+	for _, player := range players {
+		if (*player.Address.TCPAddr).String() == (*addr).String() {
+			return player, nil
+		}
+	}
+	return nil, errors.New("Player not found")
+}
+
+// MatchPlayer tries to find a player using his name
+func MatchPlayers(name string) []*Player {
+	playerList := make([]*Player, 0)
+	for _, currentPlayer := range players {
+		if currentPlayer.Match(name) {
+			playerList = append(playerList, currentPlayer)
+		}
+	}
+	return playerList
+}
+
+// Match checks if a player name begins with a specific expression
 func (p *Player) Match(name string) bool {
 	return strings.ToLower(p.Name[:len(name)]) == strings.ToLower(name) ||
 		name == "*"
 }
 
+// Equals checks whether or not a player is another player
+func (p *Player) Equals(p2 *Player) bool {
+	return p.Account == p2.Account
+}
+
 // Send send multiple packets to a player
 func (p *Player) Send(packets ...*packet.Packet) {
 	for _, pkt := range packets {
-		message := UDPOutboundMessage{
-			Address: p.Address,
-			Packet:  pkt,
-		}
-		UdpNetworkInput <- &message
+		p.Address.Send(pkt, p)
 	}
 }
 
@@ -79,8 +113,8 @@ func (p *Player) NextTick() {
 }
 
 func (p *Player) SendMessage(message string) {
-	messagePacket := packet.New(0x03)
-	messagePacket.AddFieldString(&message)
+	messagePacket := packet.New(packet.PacketTypeUDP, 0x03)
+	messagePacket.AddFieldString(message)
 	p.Send(messagePacket)
 }
 
@@ -89,12 +123,22 @@ func (p *Player) Kick(reason string) {
 	if reason == "" {
 		reason = "Kicked!"
 	}
-	kickPacket := packet.New(0x02)
+	kickPacket := packet.New(packet.PacketTypeUDP, 0x02)
 	reasonBytes := []byte(reason)
-	kickPacket.AddField(&reasonBytes)
+	kickPacket.AddField(reasonBytes)
 	p.Send(kickPacket)
 	SendMessage(p.Name + " has been kicked!")
 	p.Remove()
+}
+
+// IsOperator checks if a player is allowed to run commands on the server
+func (p *Player) IsOperator() bool {
+	for _, currentOperator := range config.Operators {
+		if currentOperator == p.Account {
+			return true
+		}
+	}
+	return false
 }
 
 // RefreshName gets the player name from the web
@@ -124,7 +168,10 @@ func (p *Player) RefreshName() error {
 // Remove remove a player form the server
 func (p *Player) Remove() {
 	for i, player := range players {
-		if player.Address.String() == p.Address.String() {
+		if p.Address.Compare(player.Address) {
+			// Network channel closing
+			close(player.TCPNetworkInput)
+			// Player deletion
 			delete(players, i)
 			break
 		}
@@ -140,9 +187,9 @@ func UpdatePlayerList() {
 		buf.Write([]byte(player.Name))
 		buf.WriteByte(0x00)
 	}
-	p := packet.New(0x06)
+	p := packet.New(packet.PacketTypeUDP, 0x06)
 	bufferBytes := buf.Bytes()
-	p.AddField(&bufferBytes)
+	p.AddField(bufferBytes)
 	for _, player := range players {
 		player.Send(p)
 	}

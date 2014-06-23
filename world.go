@@ -80,12 +80,12 @@ func WorldSimulation() {
 
 func (w *World) Packet(uuid uint32, receiver *Player) []*packet.Packet {
 	packets, i := make([]*packet.Packet, 1), 0
-	packets[i] = packet.New(0x04)
+	packets[i] = packet.New(packet.PacketTypeUDP, 0x04)
 
 	idBuf := bytes.NewBuffer(nil)
 	binary.Write(idBuf, binary.LittleEndian, uuid)
 	bufBytes := idBuf.Bytes()
-	packets[i].AddField(&bufBytes)
+	packets[i].AddField(bufBytes)
 
 	if len(w.Players) > 0 {
 		for j, p1 := range w.Players {
@@ -96,13 +96,14 @@ func (w *World) Packet(uuid uint32, receiver *Player) []*packet.Packet {
 
 			var newBytes []byte
 
-			if !receiver.LastAcknowledged.Initialized {
+			if receiver.LastAcknowledged == nil ||
+				!receiver.LastAcknowledged.Initialized {
 				newBytes = makePlayerPacket(j, p1, &Player{})
 			} else {
 				// Search for player's previous state in the other world
 				playerExists := false
 				for _, p2 := range receiver.LastAcknowledged.Players {
-					if p1.Address.String() == p2.Address.String() {
+					if p1.Address.Compare(p2.Address) {
 						playerExists = true
 						newBytes = makePlayerPacket(j, p1, p2)
 						break
@@ -116,11 +117,12 @@ func (w *World) Packet(uuid uint32, receiver *Player) []*packet.Packet {
 
 			// Smooth splitting
 			if len(packets[i].Data)+len(newBytes)+2 > packet.PacketSize {
-				packets = append(packets, packet.New(0x04))
+				packets = append(packets, packet.New(packet.PacketTypeUDP,
+					0x04))
 				i++
 			}
 
-			packets[i].AddField(&newBytes)
+			packets[i].AddField(newBytes)
 		}
 	}
 	return packets
@@ -169,7 +171,8 @@ func makePlayerPacket(id byte, p1, p2 *Player) []byte {
 			buf.WriteByte(fieldValue1.(byte))
 		default:
 			log.Info(fieldType.Type.String(), fieldType.Name)
-			log.Panic("Unknown data type encountered when encoding broadcast packet!")
+			log.Panic("Unknown data type encountered when encoding broadcast " +
+				"packet!")
 		}
 	}
 	return buf.Bytes()
@@ -177,8 +180,8 @@ func makePlayerPacket(id byte, p1, p2 *Player) []byte {
 
 // SendMessage messages all players on the server
 func SendMessage(message string) {
-	messagePacket := packet.New(0x03)
-	messagePacket.AddFieldString(&message)
+	messagePacket := packet.New(packet.PacketTypeUDP, 0x03)
+	messagePacket.AddFieldString(message)
 	for _, currentPlayer := range players {
 		currentPlayer.Send(messagePacket)
 	}

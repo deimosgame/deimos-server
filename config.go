@@ -21,6 +21,7 @@ var (
 		Port:           1518,
 		MaxPlayers:     16,
 		Maps:           []string{"d_compound"},
+		Operators:      []string{},
 		Verbose:        false,
 		LogFile:        "server.log",
 		AutoInsecure:   false,
@@ -44,6 +45,7 @@ type AkadokConfig struct {
 	Port           int
 	MaxPlayers     int
 	Maps           []string
+	Operators      []string
 	Verbose        bool
 	LogFile        string
 	AutoInsecure   bool

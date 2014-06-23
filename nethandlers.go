@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"net"
+	"strings"
 	"time"
 
 	"bitbucket.org/deimosgame/go-akadok/packet"
@@ -26,10 +26,19 @@ func SetupPacketHandlers() {
 	RegisterPacketHandler(0x08, HandleSoundPacket)
 }
 
-func HandlePacket(handler interface{}, addr *net.UDPAddr, p *packet.Packet) {
-	h := PacketHandler{addr}
+func HandlePacket(handler interface{}, addr *Address, p *packet.Packet,
+	player *Player) {
+	h := &PacketHandler{Address: addr}
+	if player == nil {
+		if addr.TCPAddr != nil {
+			player, _ = MatchByTCPAddress(addr.TCPAddr)
+		} else if addr.UDPAddr != nil {
+			player, _ = MatchByUDPAddress(addr.UDPAddr)
+		}
+	}
+	h.Player = player
 	// Magic happens
-	(handler.(func(*PacketHandler, *packet.Packet)))(&h, p)
+	handler.(func(*PacketHandler, *packet.Packet))(h, p)
 }
 
 // RegisterPacketHandler adds/edits a handler for a given packet type
@@ -49,10 +58,10 @@ func UnregisterPacketHandler(packetId byte) bool {
 }
 
 // CheckHandler tries to use a handler for packets
-func UsePacketHandler(origin *net.UDPAddr, p *packet.Packet) {
+func UsePacketHandler(origin *Address, p *packet.Packet, pl *Player) {
 	if handler, ok := Handlers[p.Id]; ok {
 		// Starts a new goroutine for the handler
-		go HandlePacket(handler, origin, p)
+		go HandlePacket(handler, origin, p, pl)
 	} else {
 		log.Warn("An unknown packet has been received!")
 	}
@@ -63,20 +72,18 @@ func UsePacketHandler(origin *net.UDPAddr, p *packet.Packet) {
  */
 
 type PacketHandler struct {
-	Address *net.UDPAddr
+	Address *Address
+	Player  *Player
 }
 
 // Answer adds a packet to send to the network queue
 func (h *PacketHandler) Answer(p *packet.Packet) {
-	UdpNetworkInput <- &UDPOutboundMessage{
-		Address: h.Address,
-		Packet:  p,
-	}
+	h.Address.Send(p, h.Player)
 }
 
 // Error returns an error packet to the client
 func (h *PacketHandler) Error() {
-	errorPacket := packet.New(0)
+	errorPacket := packet.New(packet.PacketTypeTCP, 0)
 	errorPacket.AddFieldBytes(0)
 	h.Answer(errorPacket)
 }
@@ -84,7 +91,10 @@ func (h *PacketHandler) Error() {
 // GetPlayer allows a handler to easily get a player from its address
 func (h *PacketHandler) GetPlayer() (*Player, error) {
 	for _, player := range players {
-		if player.Address.String() == h.Address.String() {
+		if (h.Address.TCPAddr != nil && player.Address.TCPAddr != nil &&
+			(*h.Address.TCPAddr).String() == (*player.Address.TCPAddr).String()) ||
+			(h.Address.TCPAddr != nil && player.Address.TCPAddr != nil &&
+				h.Address.TCPAddr.String() == player.Address.TCPAddr.String()) {
 			return player, nil
 		}
 	}
@@ -95,27 +105,19 @@ func (h *PacketHandler) GetPlayer() (*Player, error) {
  *  Various packet handlers (convention: HandleXPacket)
  */
 
-// HandleHandshakePacket (0x00)
+// HandleHandshakePacket (0x00) is not represented anymore here since it is now
+// hard-coded into net_tcp.go for connection initialization purposes.
+
+// HandleHandshakePacket (0x00) just triggers an error if it is called, since
+// the handler shouldn't deal with handshake packets
 func HandleHandshakePacket(h *PacketHandler, p *packet.Packet) {
-	outPacket := packet.New(0)
-	if version, err := p.GetField(0, 1); err != nil ||
-		(*version)[0] != ProtocolVersion {
-		outPacket.AddFieldBytes(0)
-	} else {
-		outPacket.AddFieldBytes(ProtocolVersion)
-	}
-	h.Answer(outPacket)
+	h.Error()
+	h.Player.Remove()
 }
 
 // HandleClientConnectionPacket (0x01). Allows a player to connect if
 // everything is alright
 func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
-	if _, err := h.GetPlayer(); err == nil {
-		// Player is already connected
-		h.Error()
-		return
-	}
-
 	// Retrive fields for the connection
 	userId, err := p.GetFieldString(0)
 	if err != nil {
@@ -124,24 +126,24 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 	}
 	// Check if the account is not already used
 	for _, player := range players {
-		if player.Account == *userId {
+		if player.Account == userId {
 			h.Error()
 			return
 		}
 	}
-	token, err := p.GetFieldString(len(*userId) + 1)
+	token, err := p.GetFieldString(len(userId) + 1)
 	if err != nil {
 		h.Error()
 		return
 	}
 
 	// Check the credentials of the user
-	validToken, err := CheckToken(*userId, *token)
+	validToken, err := CheckToken(userId, token)
 	if err != nil {
 		h.Error()
 		return
 	}
-	outPacket := packet.New(0x01)
+	outPacket := packet.New(packet.PacketTypeTCP, 0x01)
 	if !validToken {
 		// 0 for denied connection
 		outPacket.AddFieldBytes(0)
@@ -149,33 +151,23 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 		return
 	}
 
-	// Create a player
-	newPlayer := Player{
-		Account:          string(*userId),
-		Address:          h.Address,
-		LastAcknowledged: &World{},
-		Initialized:      true,
-	}
-	newPlayer.RefreshName()
-
-	i := byte(0)
-	for ; i <= 255; i++ {
-		if _, ok := players[i]; !ok {
-			break
-		}
-	}
-	players[i] = &newPlayer
+	// Modify the player previously created during the handsake
+	player := h.Player
+	player.Account = userId
+	player.LastAcknowledged = &World{}
+	player.Initialized = true
+	player.RefreshName()
 
 	// Send authorization packet
 	outPacket.AddFieldBytes(1)
-	outPacket.AddFieldString(&currentMap)
+	outPacket.AddFieldString(currentMap)
 	h.Answer(outPacket)
 
 	UpdatePlayerList()
 
-	log.Info(newPlayer.Name + " (" + newPlayer.Account + " - " +
-		h.Address.IP.String() + ") has joined the game!")
-	SendMessage(newPlayer.Name + " has joined the game!")
+	log.Info(player.Name + " (" + player.Account + " - " +
+		(*h.Address.TCPAddr).String() + ") has joined the game!")
+	SendMessage(player.Name + " has joined the game!")
 }
 
 // HandleDisconnectionPacket (0x02) handles player disconnections
@@ -203,8 +195,44 @@ func HandleChatPacket(h *PacketHandler, p *packet.Packet) {
 		h.Error()
 		return
 	}
-	log.Info("<" + player.Name + "> " + *message)
-	SendMessage("<" + player.Name + "> " + *message)
+
+	if message[0] == '/' {
+		// Handle commands
+		if !h.Player.IsOperator() {
+			h.Player.SendMessage("You are not allowed to run commands on the " +
+				"server.")
+			return
+		}
+		HandleCommand(message[1:], h.Player)
+		return
+	} else if message[0] == '@' {
+		// Handle private messages
+		messageSplit := strings.Split(message[1:], " ")
+		if messageSplit[0] == "*" && !h.Player.IsOperator() {
+			h.Player.SendMessage("You can't send a private message to " +
+				"everybody.")
+			return
+		}
+		matchedPlayers := MatchPlayers(messageSplit[0])
+		if len(matchedPlayers) == 0 {
+			h.Player.SendMessage("No player with this name has been found.")
+			return
+		}
+		if len(matchedPlayers) > 1 && !h.Player.IsOperator() {
+			// Only operators can PM multiple players at once
+			h.Player.SendMessage("You can't send private messages to " +
+				"multiple persons simultaneously.")
+			return
+		}
+		messageText := message[len(messageSplit[0])+2:]
+		for _, currentPlayer := range matchedPlayers {
+			currentPlayer.SendMessage("<PM " + player.Name + "> " + messageText)
+		}
+		return
+	}
+
+	log.Info("<" + player.Name + "> " + message)
+	SendMessage("<" + player.Name + "> " + message)
 }
 
 // HandleAcknowledgementPacket (0x04) handles world acknowledgement packets from
@@ -216,11 +244,11 @@ func HandleAcknowledgementPacket(h *PacketHandler, p *packet.Packet) {
 		return
 	}
 	idBytes, err := p.GetField(0, 4)
-	if err != nil || len(*idBytes) != 4 {
+	if err != nil || len(idBytes) != 4 {
 		h.Error()
 		return
 	}
-	id := binary.LittleEndian.Uint32(*idBytes)
+	id := binary.LittleEndian.Uint32(idBytes)
 	if snapshot, ok := worldSnapshots[id]; ok {
 		player.LastAcknowledged = snapshot
 	} else {
@@ -231,8 +259,8 @@ func HandleAcknowledgementPacket(h *PacketHandler, p *packet.Packet) {
 
 // HandleMovementPacket (0x05) changes the position of the player
 func HandleMovementPacket(h *PacketHandler, p *packet.Packet) {
-	player, err := h.GetPlayer()
-	if err != nil || len(p.Data) != 40 {
+	player := h.Player
+	if len(p.Data) != 40 {
 		h.Error()
 		return
 	}
@@ -244,7 +272,7 @@ func HandleMovementPacket(h *PacketHandler, p *packet.Packet) {
 			return
 		}
 		var element float32
-		buf := bytes.NewReader(*field)
+		buf := bytes.NewReader(field)
 		err = binary.Read(buf, binary.LittleEndian, &element)
 		if err != nil {
 			h.Error()
@@ -306,22 +334,28 @@ func HandleInformationChangePacket(h *PacketHandler, p *packet.Packet) {
 		return
 	}
 	// Update player
-	player.CurrentWeapon = (*weapon)[0]
-	player.ModelId = (*model)[0]
+	player.CurrentWeapon = weapon[0]
+	player.ModelId = model[0]
 
-	if player.LifeState != (*lifeState)[0] {
-		player.LifeState = (*lifeState)[0]
-		if (*lifeState)[0] == 0 {
+	if player.LifeState != lifeState[0] {
+		player.LifeState = lifeState[0]
+		if lifeState[0] == 0 {
 			log.Infof("%s died", player.Name)
 		}
 	}
 
-	if (*refreshByte)[0] != 0 {
+	if refreshByte[0] != 0 {
 		player.RefreshName()
 	}
 }
 
 // HandleSoundPacket handles the sound packets emitted from players
 func HandleSoundPacket(h *PacketHandler, p *packet.Packet) {
-
+	p.Type = packet.PacketTypeUDP
+	for _, currentPlayer := range players {
+		if currentPlayer.Equals(h.Player) {
+			continue
+		}
+		currentPlayer.Send(p)
+	}
 }
