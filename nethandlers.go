@@ -44,6 +44,10 @@ func HandlePacket(handler interface{}, addr *Address, p *packet.Packet,
 		}
 	}
 	h.Player = player
+	if player == nil {
+		h.Error()
+		return
+	}
 	// Magic happens
 	handler.(func(*PacketHandler, *packet.Packet))(h, p)
 }
