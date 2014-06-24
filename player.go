@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -85,9 +84,9 @@ func MatchPlayers(name string) []*Player {
 
 // Match checks if a player name begins with a specific expression
 func (p *Player) Match(name string) bool {
-	fmt.Println(p.Name, len(name))
-	return strings.ToLower(p.Name[:len(name)]) == strings.ToLower(name) ||
-		name == "*"
+	return len(p.Name) >= len(name) &&
+		(strings.ToLower(p.Name[:len(name)]) == strings.ToLower(name) ||
+			name == "*")
 }
 
 // Equals checks whether or not a player is another player
