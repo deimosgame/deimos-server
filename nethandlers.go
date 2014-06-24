@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -261,19 +262,15 @@ func HandleChatPacket(h *PacketHandler, p *packet.Packet) {
 // HandleAcknowledgementPacket (0x04) handles world acknowledgement packets from
 // the client
 func HandleAcknowledgementPacket(h *PacketHandler, p *packet.Packet) {
-	player, err := h.GetPlayer()
-	if err != nil {
-		h.Error()
-		return
-	}
 	idBytes, err := p.GetField(0, 4)
 	if err != nil || len(idBytes) != 4 {
+		fmt.Println("ack2")
 		h.Error()
 		return
 	}
 	id := binary.LittleEndian.Uint32(idBytes)
 	if snapshot, ok := worldSnapshots[id]; ok {
-		player.LastAcknowledged = snapshot
+		h.Player.LastAcknowledged = snapshot
 	} else {
 		h.Error()
 		return
