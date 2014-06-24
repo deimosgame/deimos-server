@@ -42,6 +42,8 @@ Here are a list of parameters that may be used in Akadok config files (unknown p
 
 **maps**: Maps used for map rotation. Map names are separated by commas. Default: map1, map2, map3
 
+**ops**: List of operators of the server, separated by a comma.
+
 **verbose**: Used for debugging purposes. Outputs every event on the server to logs. Default: off
 
 **log_file**: Changes server's logs location. Default: server.log
