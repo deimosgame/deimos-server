@@ -106,11 +106,13 @@ func UnlockAchievementCallback(apiReq *APIRequest) {
 	}
 	var response Response
 	json.Unmarshal(body, &response)
-	if !response.Success && len(apiReq.Player.Achievements) > 0 {
+	if !response.Success {
 		// Achievement 1 is unlocked on connect when the list may be not loaded
-		log.Warn("Error while unlocking achievement " +
-			strconv.Itoa(apiReq.AchievementId) + " for " +
-			apiReq.Player.Account)
+		if len(apiReq.Player.Achievements) > 0 && apiReq.AchievementId != 1 {
+			log.Warn("Error while unlocking achievement " +
+				strconv.Itoa(apiReq.AchievementId) + " for " +
+				apiReq.Player.Account)
+		}
 		return
 	}
 	if len(apiReq.Player.Achievements) > 0 {
