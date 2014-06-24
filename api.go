@@ -124,10 +124,13 @@ func UnlockAchievementCallback(apiReq *APIRequest) {
 }
 
 func OnPlayerKill(killed, killer *Player) {
-
 	if killer.Equals(killed) {
 		// Achivement: A Special Kind of Stupid
 		UnlockAchievement(killed, 8)
+
+		if killer.Score > 0 {
+			killer.Score--
+		}
 		return
 	}
 
@@ -138,6 +141,7 @@ func OnPlayerKill(killed, killer *Player) {
 	UnlockAchievement(killer, 2)
 
 	killer.Victims++
+	killer.Score++
 
 	if killer.Victims == 5 {
 		// Achievement: Getting used to it
