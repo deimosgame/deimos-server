@@ -34,6 +34,7 @@ func SetupCommandHandlers() {
 	RegisterCommandHandler("send", HandleSendCommand)
 	RegisterCommandHandler("op", HandleOpCommand)
 	RegisterCommandHandler("deop", HandleDeopCommand)
+	RegisterCommandHandler("players", HandlePlayersCommand)
 }
 
 // RegisterCommandHandler saves command handlers into a dedicated map
@@ -191,4 +192,16 @@ Please specify a single player for safety reasons.`
 	config.Operators = newOperators
 	players[0].SendMessage("You are not a server operator anymore.")
 	return players[0].Name + " has lost his operator powers."
+}
+
+func HandlePlayersCommand(args []string, p *Player) string {
+	playerList := ""
+	for _, currentPlayer := range players {
+		playerList += " " + currentPlayer.Name
+	}
+	if len(playerList) == 0 {
+		return "No player is online."
+	} else {
+		return "Online players: " + playerList[1:]
+	}
 }
