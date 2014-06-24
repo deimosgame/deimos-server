@@ -48,7 +48,7 @@ func main() {
 
 	InitLogging()
 
-	log.Notice("Akadok is loading...")
+	log.Notice("Deimos server is loading...")
 	//log.DebugMode = true
 
 	/* Server IP resolving */
@@ -84,7 +84,7 @@ func main() {
 
 	/* Tadaaaa */
 
-	log.Notice("Akadok has started")
+	log.Notice("Deimos server has started")
 
 	// Keeps the main process idle
 	for {
