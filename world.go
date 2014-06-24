@@ -68,12 +68,12 @@ func WorldSimulation() {
 		if diff < tickRate {
 			if serverKeepupAlert {
 				serverKeepupAlert = false
-				log.Notice("Server is synchronized again")
+				// log.Notice("Server is synchronized again")
 			}
 			time.Sleep(tickRate - diff)
 		} else if !serverKeepupAlert {
 			serverKeepupAlert = true
-			log.Warn("Server can't keep up! Lower the tick rate!")
+			// log.Warn("Server can't keep up! Lower the tick rate!")
 		}
 	}
 }
