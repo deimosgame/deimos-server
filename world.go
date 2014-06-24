@@ -187,4 +187,5 @@ func SendMessage(message string) {
 	for _, currentPlayer := range players {
 		currentPlayer.Send(messagePacket)
 	}
+	log.Info(message)
 }
