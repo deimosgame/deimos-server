@@ -9,6 +9,7 @@ import (
 
 const (
 	ProtocolVersion    = byte(1)
+	APIServer          = "https://deimos-ga.me/api"
 	MasterServer       = "https://akadok.deimos-ga.me"
 	HeartbeatInterval  = 15 * time.Second
 	BroadcastInterval  = 20 * time.Millisecond
@@ -20,11 +21,13 @@ var (
 	log        *util.Logger
 	configFile = "server.cfg"
 
+	apiServerLost     = false
 	masterServerLost  = false
 	serverKeepupAlert = false
 	insecureAlert     = false
 
 	UdpNetworkInput = make(chan *UDPOutboundMessage, NetworkChannelSize)
+	APIInput        = make(chan *APIRequest, NetworkChannelSize)
 	tickRateSecs    float32
 
 	// Game-related variables
@@ -77,6 +80,7 @@ func main() {
 
 	go UDPServer()
 	go TCPServer()
+	go APIProcess()
 
 	/* Tadaaaa */
 

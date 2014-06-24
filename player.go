@@ -42,6 +42,10 @@ type Player struct {
 	ModelId       byte `prefix:"M"`
 	CurrentWeapon byte `prefix:"W"`
 
+	Victims          int
+	CurrentStreak    int
+	Achievements     []int
+	LastDamagePacket *packet.Packet
 	LastUpdate       time.Time
 	LastAcknowledged *World
 	TCPNetworkInput  chan *packet.Packet

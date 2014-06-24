@@ -23,6 +23,7 @@ func SetupPacketHandlers() {
 	RegisterPacketHandler(0x04, HandleAcknowledgementPacket)
 	RegisterPacketHandler(0x05, HandleMovementPacket)
 	RegisterPacketHandler(0x07, HandleInformationChangePacket)
+	RegisterPacketHandler(0x0C, HandleDamagePacket)
 
 	// Bouncing packets
 	RegisterPacketHandler(0x08, HandleBounce(packet.PacketTypeUDP))
@@ -174,7 +175,11 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 	player.Account = userId
 	player.LastAcknowledged = &World{}
 	player.Initialized = true
+	CheckUnlockedAchivements(player)
 	player.RefreshName()
+
+	// Achievement: log into a server
+	UnlockAchievement(player, 1)
 
 	// Send authorization packet
 	outPacket.AddFieldBytes(1)
@@ -355,14 +360,107 @@ func HandleInformationChangePacket(h *PacketHandler, p *packet.Packet) {
 	player.CurrentWeapon = weapon[0]
 	player.ModelId = model[0]
 
-	if player.LifeState != lifeState[0] {
-		player.LifeState = lifeState[0]
-		if lifeState[0] == 0 {
-			log.Infof("%s died", player.Name)
-		}
+	if player.CurrentWeapon == 5 {
+		// Achievement: unlock the mystery weapon
+		UnlockAchievement(player, 3)
 	}
 
 	if refreshByte[0] != 0 {
 		player.RefreshName()
 	}
+
+	if player.LifeState == lifeState[0] {
+		return
+	}
+
+	// Last damage decoding, mainly for achievements
+	var damage int32
+	var damageAuthorBytes []byte
+	var damageAuthor *Player
+	if player.LastDamagePacket != nil {
+		damageBytes, err := player.LastDamagePacket.GetField(1, 4)
+		if err != nil {
+			h.Error()
+			return
+		}
+		buf := bytes.NewReader(damageBytes)
+		binary.Read(buf, binary.LittleEndian, &damage)
+		damageAuthorBytes, err = player.LastDamagePacket.GetField(0, 1)
+		if err != nil {
+			h.Error()
+			return
+		}
+		damageAuthor = players[damageAuthorBytes[0]]
+	}
+
+	// Happens when the player dies
+	player.LifeState = lifeState[0]
+	if lifeState[0] != 0 {
+		return
+	}
+
+	if player.LastDamagePacket == nil {
+		log.Infof("%s died.", player.Name)
+		return
+	}
+	log.Infof("%s was killed by %s.", player.Name, damageAuthor.Name)
+
+	if !damageAuthor.Equals(h.Player) && player.CurrentStreak > 5 {
+		// Achievement: Instant cooling
+		UnlockAchievement(damageAuthor, 12)
+	}
+
+	// Kill packet, for Manu
+	killPacket := packet.New(packet.PacketTypeTCP, 0x0D)
+	victimId := byte(0)
+	for i, currentPlayer := range players {
+		if currentPlayer.Equals(h.Player) {
+			victimId = i
+			break
+		}
+	}
+	killPacket.AddFieldBytes(victimId)
+	killPacket.AddFieldBytes(damageAuthorBytes[0])
+	if damageAuthor.Equals(h.Player) {
+		killPacket.AddFieldBytes(0xFF)
+	} else {
+		killPacket.AddFieldBytes(damageAuthor.CurrentWeapon)
+	}
+	for _, currentPlayer := range players {
+		currentPlayer.Send(killPacket)
+	}
+
+	player.CurrentStreak = 0
+	OnPlayerKill(h.Player, damageAuthor)
+}
+
+// HandleDamagePacket handles player damage, may it be from the player himself
+// or from another player
+func HandleDamagePacket(h *PacketHandler, p *packet.Packet) {
+	hitPlayerBytes, err := p.GetField(0, 1)
+	if err != nil {
+		h.Error()
+		return
+	}
+	hitPlayer, ok := players[hitPlayerBytes[0]]
+	if !ok {
+		h.Error()
+		return
+	}
+
+	if hitPlayer.Equals(h.Player) {
+		// Achievement: Self-Harm
+		UnlockAchievement(h.Player, 7)
+	}
+
+	// Broadcast the damage packet to all players
+	damagePacket := packet.New(packet.PacketTypeTCP, 0x0C)
+	damageFieldBytes, err := p.GetField(1, 4)
+	if err != nil {
+		h.Error()
+		return
+	}
+	damagePacket.AddField(damageFieldBytes)
+	hitPlayer.LastDamagePacket = p
+	hitPlayer.Send(damagePacket)
 }
