@@ -458,7 +458,7 @@ func HandleMinigamePacket(h *PacketHandler, p *packet.Packet) {
 	// Packet for the player who sent the 0x09 packet in the first place
 	incomingPacket := packet.New(packet.PacketTypeTCP, 0x09)
 	incomingPacket.AddFieldBytes(minigameId, triggerType, 0x00, outgoingId)
-	h.Player.Send(incomingPacket)
+	h.Answer(incomingPacket)
 	// Same packet, for his enemy
 	outgoingPacket := packet.New(packet.PacketTypeTCP, 0x09)
 	outgoingPacket.AddFieldBytes(minigameId, triggerType, 0x01, incomingId)
