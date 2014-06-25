@@ -329,8 +329,8 @@ func HandleMovementPacket(h *PacketHandler, p *packet.Packet) {
 // HandleInformationChangePacket (0x07) is a packet for small information
 // changes that does not desserve to be present in a move event
 func HandleInformationChangePacket(h *PacketHandler, p *packet.Packet) {
-	player, err := h.GetPlayer()
-	if err != nil || len(p.Data) != 4 {
+	player := h.Player
+	if len(p.Data) != 4 {
 		h.Error()
 		return
 	}
@@ -372,65 +372,53 @@ func HandleInformationChangePacket(h *PacketHandler, p *packet.Packet) {
 		return
 	}
 
-	// Last damage decoding, mainly for achievements
-	var damage int32
-	var damageAuthorBytes []byte
-	var damageAuthor *Player
-	if player.LastDamagePacket != nil {
-		damageBytes, err := player.LastDamagePacket.GetField(1, 4)
-		if err != nil {
-			h.Error()
-			return
-		}
-		buf := bytes.NewReader(damageBytes)
-		binary.Read(buf, binary.LittleEndian, &damage)
-		damageAuthorBytes, err = player.LastDamagePacket.GetField(0, 1)
-		if err != nil {
-			h.Error()
-			return
-		}
-		damageAuthor = players[damageAuthorBytes[0]]
-	}
-
 	// Happens when the player dies
 	player.LifeState = lifeState[0]
 	if lifeState[0] != 0 {
 		return
 	}
 
-	if player.LastDamagePacket == nil {
+	if player.LastDamage == nil || player.LastDamage.Player.Equals(player) {
 		log.Infof("%s died.", player.Name)
-		return
+	} else {
+		log.Infof("%s was killed by %s.", player.Name,
+			player.LastDamage.Player.Name)
 	}
-	log.Infof("%s was killed by %s.", player.Name, damageAuthor.Name)
 
-	if !damageAuthor.Equals(h.Player) && player.CurrentStreak > 5 {
+	if !player.LastDamage.Player.Equals(player) && player.CurrentStreak > 5 {
 		// Achievement: Instant cooling
-		UnlockAchievement(damageAuthor, 12)
+		UnlockAchievement(player.LastDamage.Player, 12)
 	}
 
 	// Kill packet, for Manu
 	killPacket := packet.New(packet.PacketTypeTCP, 0x0D)
-	victimId := byte(0)
+	victimId, authorId := byte(0), byte(0)
 	for i, currentPlayer := range players {
-		if currentPlayer.Equals(h.Player) {
+		if currentPlayer.Equals(player) {
 			victimId = i
-			break
+		}
+		if currentPlayer.Equals(player.LastDamage.Player) {
+			authorId = i
 		}
 	}
 	killPacket.AddFieldBytes(victimId)
-	killPacket.AddFieldBytes(damageAuthorBytes[0])
-	if damageAuthor.Equals(h.Player) {
-		killPacket.AddFieldBytes(0xFF)
+	killPacket.AddFieldBytes(authorId)
+	if player.LastDamage.Player.Equals(player) {
+		killPacket.AddFieldBytes(0xFF, 0x00)
 	} else {
-		killPacket.AddFieldBytes(damageAuthor.CurrentWeapon)
+		killPacket.AddFieldBytes(player.LastDamage.Player.CurrentWeapon)
+		if player.LastDamage.Player.CurrentStreak > 5 {
+			killPacket.AddFieldBytes(0x01)
+		} else {
+			killPacket.AddFieldBytes(0x00)
+		}
 	}
 	for _, currentPlayer := range players {
 		currentPlayer.Send(killPacket)
 	}
 
 	player.CurrentStreak = 0
-	OnPlayerKill(h.Player, damageAuthor)
+	OnPlayerKill(h.Player, player.LastDamage.Player)
 }
 
 // HandleDamagePacket handles player damage, may it be from the player himself
@@ -460,6 +448,14 @@ func HandleDamagePacket(h *PacketHandler, p *packet.Packet) {
 		return
 	}
 	damagePacket.AddField(damageFieldBytes)
-	hitPlayer.LastDamagePacket = p
 	hitPlayer.Send(damagePacket)
+
+	// Save the damage
+	var damage int
+	buf := bytes.NewReader(damageFieldBytes)
+	binary.Read(buf, binary.LittleEndian, &damage)
+	hitPlayer.LastDamage = &DamageData{
+		Player: h.Player,
+		Damage: damage,
+	}
 }

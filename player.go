@@ -44,11 +44,16 @@ type Player struct {
 	Victims          int
 	CurrentStreak    int
 	Achievements     []int
-	LastDamagePacket *packet.Packet
+	LastDamage       *DamageData
 	LastUpdate       time.Time
 	LastAcknowledged *World
 	TCPNetworkInput  chan *packet.Packet
 	Initialized      bool
+}
+
+type DamageData struct {
+	Player *Player
+	Damage int
 }
 
 // MatchByUDPAddress tries to match an UDP address with the player using it
