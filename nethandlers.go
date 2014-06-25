@@ -29,6 +29,8 @@ func SetupPacketHandlers() {
 	// Bouncing packets
 	RegisterPacketHandler(0x08, HandleBounce(packet.PacketTypeUDP))
 	RegisterPacketHandler(0x0B, HandleBounce(packet.PacketTypeTCP))
+	// Temporary object update packet
+	RegisterPacketHandler(0x0E, HandleBounce(packet.PacketTypeTCP))
 }
 
 // HandlePacket bootstraps the handler goroutine with useful information such
