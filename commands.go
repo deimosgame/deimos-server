@@ -35,11 +35,22 @@ func SetupCommandHandlers() {
 	RegisterCommandHandler("op", HandleOpCommand)
 	RegisterCommandHandler("deop", HandleDeopCommand)
 	RegisterCommandHandler("players", HandlePlayersCommand)
+	RegisterCommandHandler("godmode", HandleGodmodeCommand)
+
+	AllowClientCommand("debug")
+	AllowClientCommand("noclip")
+	AllowClientCommand("kill")
 }
 
 // RegisterCommandHandler saves command handlers into a dedicated map
 func RegisterCommandHandler(command string, handler interface{}) {
 	CommandHandlers[command] = handler
+}
+
+// AllowClientCommand allows some commands to be interpreted by the client
+// instead of being executed by the server
+func AllowClientCommand(command string) {
+	CommandHandlers[command] = nil
 }
 
 func HandleCommand(rawArgs string, sender *Player) {
@@ -64,6 +75,11 @@ func HandleCommand(rawArgs string, sender *Player) {
 		} else {
 			sender.SendMessage("This command does not exists!")
 		}
+		return
+	}
+
+	// Commands allowed with AllowClientCommand()
+	if handler == nil {
 		return
 	}
 
@@ -204,4 +220,34 @@ func HandlePlayersCommand(args []string, p *Player) string {
 	} else {
 		return "Online players: " + playerList[1:]
 	}
+}
+
+func HandleGodmodeCommand(args []string, p *Player) string {
+	if len(args) == 0 && p != nil {
+		if p.Godmode {
+			p.Godmode = false
+			return "God mode has been disabled"
+		}
+		p.Godmode = true
+		return "God mode has been enabled"
+	} else if len(args) == 0 {
+		return "You cannot give god mode to the console."
+	} else if len(args) > 1 {
+		return "You can only give to this command zero or one arguments"
+	}
+	pl := MatchPlayers(args[0])
+	if len(pl) == 0 {
+		return "No player was found!"
+	}
+	for _, currentPlayer := range pl {
+		if currentPlayer.Godmode {
+			currentPlayer.Godmode = false
+			currentPlayer.SendMessage("Your god mode has been disabled")
+		} else {
+			currentPlayer.Godmode = true
+			currentPlayer.SendMessage("God mode was enabled for you")
+		}
+		p.SendMessage("Toggled god mode for " + currentPlayer.Name)
+	}
+	return ""
 }

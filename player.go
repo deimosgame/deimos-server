@@ -44,6 +44,7 @@ type Player struct {
 	Victims          int
 	CurrentStreak    int
 	Achievements     []int
+	Godmode          bool
 	LastDamage       *DamageData
 	LastUpdate       time.Time
 	LastAcknowledged *World

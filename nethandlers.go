@@ -180,6 +180,7 @@ func HandleClientConnectionPacket(h *PacketHandler, p *packet.Packet) {
 	player.Account = userId
 	player.LastAcknowledged = &World{}
 	player.Initialized = true
+	player.Y = 1
 	CheckUnlockedAchivements(player)
 	player.RefreshName()
 
@@ -432,6 +433,11 @@ func HandleDamagePacket(h *PacketHandler, p *packet.Packet) {
 	hitPlayer, ok := players[hitPlayerBytes[0]]
 	if !ok {
 		h.Error()
+		return
+	}
+
+	// God mode
+	if hitPlayer.Godmode {
 		return
 	}
 
