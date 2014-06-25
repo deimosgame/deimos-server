@@ -83,6 +83,12 @@ func HandleCommand(rawArgs string, sender *Player) {
 		return
 	}
 
+	if !h.Player.IsOperator() {
+		h.Player.SendMessage("You are not allowed to run commands on the " +
+			"server.")
+		return
+	}
+
 	result := (handler.(func([]string, *Player) string))(args[1:], sender)
 
 	// Send command result back to the sender

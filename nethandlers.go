@@ -226,11 +226,6 @@ func HandleChatPacket(h *PacketHandler, p *packet.Packet) {
 
 	if message[0] == '/' {
 		// Handle commands
-		if !h.Player.IsOperator() {
-			h.Player.SendMessage("You are not allowed to run commands on the " +
-				"server.")
-			return
-		}
 		HandleCommand(message[1:], h.Player)
 		return
 	} else if message[0] == '@' {
