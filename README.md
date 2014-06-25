@@ -7,9 +7,7 @@ Akadok is the game server for [Deimos](http://deimos-ga.me).
 The best way to build Akadok for your system is to download the latest version of the [Go](http://golang.org) compiler. Then you just have to run the following commands in a terminal:
 
     go get bitbucket.org/deimosgame/go-akadok
-    cd $GOPATH/src/bitbucket.org/deimosgame/go-akadok
-    go get
-    go install
+    go install bitbucket.org/deimosgame/go-akadok
 
 Akadok can now be ran using the `go-akadok` command. It will generate its default config file in its directory. You can edit it as you want.
 
