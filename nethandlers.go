@@ -462,7 +462,7 @@ func HandleMinigamePacket(h *PacketHandler, p *packet.Packet) {
 	// Same packet, for his enemy
 	outgoingPacket := packet.New(packet.PacketTypeTCP, 0x09)
 	outgoingPacket.AddFieldBytes(minigameId, triggerType, 0x01, incomingId)
-	players[incomingId].Send(outgoingPacket)
+	players[outgoingId].Send(outgoingPacket)
 }
 
 // HandleDamagePacket (0x0C) handles player damage, may it be from the player himself
