@@ -40,14 +40,12 @@ func WorldSimulation() {
 		// Save the current world state as a snapshot
 		save := &World{Initialized: true}
 		save.Players = make(map[byte]*Player)
-		i := byte(0)
-		for _, p := range players {
+		for i, p := range players {
 			x := *p
 			save.Players[i] = &x
-			i++
 		}
 		save.Entities = make([]*Entity, len(entities))
-		i = 0
+		i := byte(0)
 		for e, _ := range entities {
 			x := *e
 			save.Entities[i] = &x
@@ -89,43 +87,45 @@ func (w *World) Packet(uuid uint32, receiver *Player) []*packet.Packet {
 	bufBytes := idBuf.Bytes()
 	packets[i].AddField(bufBytes)
 
-	if len(w.Players) > 0 {
-		for j, p1 := range w.Players {
-			// Do not send the player if he is the receiver
-			if p1.Account == receiver.Account {
-				continue
-			}
+	if len(w.Players) == 0 {
+		return packets
+	}
 
-			var newBytes []byte
-
-			if receiver.LastAcknowledged == nil ||
-				!receiver.LastAcknowledged.Initialized {
-				newBytes = makePlayerPacket(j, p1, &Player{})
-			} else {
-				// Search for player's previous state in the other world
-				playerExists := false
-				for _, p2 := range receiver.LastAcknowledged.Players {
-					if p1.Address.Compare(p2.Address) {
-						playerExists = true
-						newBytes = makePlayerPacket(j, p1, p2)
-						break
-					}
-				}
-
-				if !playerExists {
-					newBytes = makePlayerPacket(j, p1, &Player{})
-				}
-			}
-
-			// Smooth splitting
-			if len(packets[i].Data)+len(newBytes)+2 > packet.PacketSize {
-				packets = append(packets, packet.New(packet.PacketTypeUDP,
-					0x04))
-				i++
-			}
-
-			packets[i].AddField(newBytes)
+	for j, p1 := range w.Players {
+		// Do not send the player if he is the receiver
+		if p1.Equals(receiver) {
+			continue
 		}
+
+		var newBytes []byte
+
+		if receiver.LastAcknowledged == nil ||
+			!receiver.LastAcknowledged.Initialized {
+			newBytes = makePlayerPacket(j, p1, &Player{})
+		} else {
+			// Search for player's previous state in the other world
+			playerExists := false
+			for k, p2 := range receiver.LastAcknowledged.Players {
+				if k == j && p2.Equals(p1) {
+					playerExists = true
+					newBytes = makePlayerPacket(j, p1, p2)
+					break
+				}
+			}
+
+			if !playerExists {
+				newBytes = makePlayerPacket(j, p1, &Player{})
+			}
+		}
+
+		// Smooth splitting
+		if len(packets[i].Data)+len(newBytes)+2 > packet.PacketSize {
+			packets = append(packets, packet.New(packet.PacketTypeUDP,
+				0x04))
+			i++
+		}
+
+		packets[i].AddField(newBytes)
 	}
 	return packets
 }
