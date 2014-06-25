@@ -28,6 +28,10 @@ func (a *Address) Send(p *packet.Packet, player *Player) error {
 		return errors.New("Cannot match anything with no addresses")
 	}
 
+	defer func() {
+		recover()
+	}()
+
 	var err error
 	if p.Type == packet.PacketTypeUDP {
 		if player == nil && a.UDPAddr == nil {
