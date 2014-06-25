@@ -78,7 +78,8 @@ func TCPHandleClient(conn *net.Conn) {
 	}
 }
 
-// TCPHandleClientSend
+// TCPHandleClientSend reads the player's TCPNetworkInput channel and sends
+// packets over the network
 func TCPHandleClientSend(conn *net.Conn, player *Player) {
 	for {
 		m, ok := <-player.TCPNetworkInput
