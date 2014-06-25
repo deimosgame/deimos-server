@@ -21,7 +21,7 @@ type Player struct {
 	// Gameplay values
 	LifeState byte `prefix:"A"`
 	Score     byte `prefix:"L"`
-	Instance  string
+	Instance  byte `prefix:"I"`
 
 	// Position
 	X float32 `prefix:"X"`

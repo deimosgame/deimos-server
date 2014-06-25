@@ -24,6 +24,7 @@ func SetupPacketHandlers() {
 	RegisterPacketHandler(0x04, HandleAcknowledgementPacket)
 	RegisterPacketHandler(0x05, HandleMovementPacket)
 	RegisterPacketHandler(0x07, HandleInformationChangePacket)
+	RegisterPacketHandler(0x09, HandleMinigamePacket)
 	RegisterPacketHandler(0x0C, HandleDamagePacket)
 
 	// Bouncing packets
@@ -419,7 +420,52 @@ func HandleInformationChangePacket(h *PacketHandler, p *packet.Packet) {
 	OnPlayerKill(h.Player, player.LastDamage.Player)
 }
 
-// HandleDamagePacket handles player damage, may it be from the player himself
+// HandleMinigamePacket (0x09) manages incoming minigame "requests"
+func HandleMinigamePacket(h *PacketHandler, p *packet.Packet) {
+	if len(p.Data) != 3 {
+		h.Error()
+		return
+	}
+	incomingId := byte(0)
+	for i, currentPlayer := range players {
+		if currentPlayer.Equals(h.Player) {
+			incomingId = i
+			break
+		}
+	}
+	outgoingIdBytes, err := p.GetField(2, 1)
+	if err != nil {
+		h.Error()
+		return
+	}
+	outgoingId := outgoingIdBytes[0]
+	minigameIdBytes, err := p.GetField(0, 1)
+	if err != nil {
+		h.Error()
+		return
+	}
+	minigameId := minigameIdBytes[0]
+	triggerTypeBytes, err := p.GetField(1, 1)
+	if err != nil {
+		h.Error()
+		return
+	}
+	triggerType := triggerTypeBytes[0]
+
+	h.Player.Instance = minigameId
+	players[incomingId].Instance = minigameId
+
+	// Packet for the player who sent the 0x09 packet in the first place
+	incomingPacket := packet.New(packet.PacketTypeTCP, 0x09)
+	incomingPacket.AddFieldBytes(minigameId, triggerType, 0x00, outgoingId)
+	h.Player.Send(incomingPacket)
+	// Same packet, for his enemy
+	outgoingPacket := packet.New(packet.PacketTypeTCP, 0x09)
+	outgoingPacket.AddFieldBytes(minigameId, triggerType, 0x01, incomingId)
+	players[incomingId].Send(outgoingPacket)
+}
+
+// HandleDamagePacket (0x0C) handles player damage, may it be from the player himself
 // or from another player
 func HandleDamagePacket(h *PacketHandler, p *packet.Packet) {
 	hitPlayerBytes, err := p.GetField(0, 1)
