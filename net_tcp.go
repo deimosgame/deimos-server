@@ -86,7 +86,7 @@ func TCPHandleClientSend(conn *net.Conn, player *Player) {
 			// Closed channel
 			return
 		}
-		// Send packets from the network output
+
 		for _, currentPacket := range m.Encode() {
 			(*conn).Write(currentPacket)
 		}
