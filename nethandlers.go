@@ -207,7 +207,6 @@ func HandleDisconnectionPacket(h *PacketHandler, p *packet.Packet) {
 		return
 	}
 	player.Remove()
-	log.Info(player.Name + " has left the server.")
 	SendMessage(player.Name + " has left the server.")
 }
 
@@ -259,7 +258,6 @@ func HandleChatPacket(h *PacketHandler, p *packet.Packet) {
 		return
 	}
 
-	log.Info("<" + player.Name + "> " + message)
 	SendMessage("<" + player.Name + "> " + message)
 }
 
