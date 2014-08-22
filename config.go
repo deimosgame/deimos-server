@@ -16,7 +16,7 @@ import (
 
 var (
 	defaultConfig = AkadokConfig{
-		Name:           "Akadok Server",
+		Name:           "Deimos server",
 		Host:           net.IPv4(0, 0, 0, 0),
 		Port:           1518,
 		MaxPlayers:     16,

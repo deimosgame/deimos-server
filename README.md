@@ -1,40 +1,40 @@
-Akadok is the game server for [Deimos](http://deimos-ga.me).
+Deimos-server is the game server for [Deimos](http://deimos-ga.me).
 
 [![wercker status](https://app.wercker.com/status/e7447bbc8dba0abab17c9a30dd64ff05/m/ "wercker status")](https://app.wercker.com/project/bykey/e7447bbc8dba0abab17c9a30dd64ff05)
 
 # Building
 
-The best way to build Akadok for your system is to download the latest version of the [Go](http://golang.org) compiler. Then you just have to run the following commands in a terminal:
+The best way to build deimos-server for your system is to download the latest version of the [Go](http://golang.org) compiler. Then you just have to run the following commands in a terminal:
 
-    go get bitbucket.org/deimosgame/go-akadok
-    go install bitbucket.org/deimosgame/go-akadok
+    go get github.com/deimosgame/deimos-server
+    go install github.com/deimosgame/deimos-server
 
-Akadok can now be ran using the `go-akadok` command. It will generate its default config file in its directory. You can edit it as you want.
+Deimos-server can now be ran using the `deimos-server` command. It will generate its default config file in its directory. You can edit it as you want.
 
 # Testing
 
-Akadok is using multiple sub-packages to make its components modular. However, the standard `go test` command only tests the current package. To run all the test suites of Akadok, this command should be ran in Akadok's root directory:
+Deimos-server is using multiple sub-packages to make its components modular. However, the standard `go test` command only tests the current package. To run all the test suites of deimos-server, this command should be ran in deimos-server's root directory:
 
     go test ./...
 
-If you just want to measure the stability of Akadok, you can rather check out our [Wercker project](https://app.wercker.com/project/bykey/e7447bbc8dba0abab17c9a30dd64ff05).
+If you just want to measure the stability of deimos-server, you can rather check out our [Wercker project](https://app.wercker.com/project/bykey/e7447bbc8dba0abab17c9a30dd64ff05).
 
 # Configuration
 
-In the configuration file (*server.cfg* by default, but this can be customized further by running the command `go-akadok /path/to/config/file.cfg`), the directives follow the format **param = value**. For instance, this is a valid config file that might be used with Akadok:
+In the configuration file (*server.cfg* by default, but this can be customized further by running the command `deimos-server /path/to/config/file.cfg`), the directives follow the format **param = value**. For instance, this is a valid config file that might be used with deimos-server:
 
     ; My wonderful config file!
     name = The best server in the world
     port = 1337
     maxplayers = 42
 
-Here are a list of parameters that may be used in Akadok config files (unknown parameters are ignored by the software):
+Here are a list of parameters that may be used in deimos-server config files (unknown parameters are ignored by the software):
 
-**name**: Changes the server name as it appears in the in-game server list. Default: Akadok server
+**name**: Changes the server name as it appears in the in-game server list. Default: Deimos server
 
-**ip**: Use this directive to force a binding IP. By default, Akadok will try to resolve server's external IP through master server ; if that fails, it will bind to 127.0.0.1.
+**ip**: Use this directive to force a binding IP. By default, deimos-server will try to resolve server's external IP through master server ; if that fails, it will bind to 127.0.0.1.
 
-**port**: Akadok's port. Default: 1518
+**port**: deimos-server's port. Default: 1518
 
 **max_players**: Maximum online players at the same time. Default: 15
 
@@ -57,7 +57,7 @@ Here are a list of parameters that may be used in Akadok config files (unknown p
 
 # Server commands
 
-The following commands are available when running your Akadok server:
+The following commands are available when running your deimos server:
 
 | Command | Arguments | Effect |
 | ------- | --------- | :----- |
