@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/deimosgame/go-akadok/packet"
+	"github.com/deimosgame/deimos-server/packet"
 )
 
 var (
@@ -30,7 +30,7 @@ func SetupPacketHandlers() {
 	// Bouncing packets
 	RegisterPacketHandler(0x08, HandleBounce(packet.PacketTypeUDP))
 	RegisterPacketHandler(0x0B, HandleBounce(packet.PacketTypeTCP))
-	// Temporary object update packet
+	// Temporary object update packet ("temporary")
 	RegisterPacketHandler(0x0E, HandleBounce(packet.PacketTypeTCP))
 }
 

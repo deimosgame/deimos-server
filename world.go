@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"time"
 
-	"bitbucket.org/deimosgame/go-akadok/packet"
+	"github.com/deimosgame/deimos-server/packet"
 )
 
 type World struct {

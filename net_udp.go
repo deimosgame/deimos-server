@@ -4,7 +4,7 @@ import (
 	"net"
 	"strconv"
 
-	"bitbucket.org/deimosgame/go-akadok/packet"
+	"github.com/deimosgame/deimos-server/packet"
 )
 
 type UDPOutboundMessage struct {
@@ -60,7 +60,7 @@ func UDPHandleClient(conn *net.UDPConn) {
 		log.Debug(strconv.Itoa(int(p.Id)), string(p.Data))
 
 		if p.IsSplitted() {
-			// TODO: stack splitted packets (maybe one day)
+			// TODO: stack splitted packets (maybe someday)
 		}
 
 		UsePacketHandler(&Address{

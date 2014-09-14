@@ -39,7 +39,7 @@ var (
 	}
 )
 
-type AkadokConfig struct {
+type DeimosConfig struct {
 	Name           string
 	Host           net.IP
 	Port           int
@@ -75,7 +75,7 @@ func LoadConfig() {
 	if err != nil {
 		panic("Config error!")
 	}
-	config = new(AkadokConfig)
+	config = new(DeimosConfig)
 
 	// Default config reflection to find fields to read
 	reflectedDefCfg := reflect.ValueOf(defaultConfig)
@@ -251,7 +251,7 @@ func WriteDefaultConfig() {
 	}
 
 	writeBuf := new(ConfigFileCleaner)
-	cfg.Write(writeBuf, "Akadok default config. Edit as you want!")
+	cfg.Write(writeBuf, "Deimos default config. Edit as you want!")
 }
 
 // Type to improve config file generation

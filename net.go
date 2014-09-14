@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net"
 
-	"bitbucket.org/deimosgame/go-akadok/packet"
+	"github.com/deimosgame/deimos-server/packet"
 )
 
 // Generic type for TCP and UDP packets

@@ -6,7 +6,7 @@ import (
 	"net"
 	"strconv"
 
-	"bitbucket.org/deimosgame/go-akadok/packet"
+	"github.com/deimosgame/deimos-server/packet"
 )
 
 // TCPServer is designed to be ran as a goroutine to listen for incoming new TCP

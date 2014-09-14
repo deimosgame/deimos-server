@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/deimosgame/go-akadok/util"
+	"github.com/deimosgame/deimos-server/util"
 )
 
 // ResolveIP uses the util package to resolve server external IP address
