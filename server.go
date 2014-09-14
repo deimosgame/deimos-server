@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	config     *AkadokConfig
+	config     *DeimosConfig
 	log        *util.Logger
 	configFile = "server.cfg"
 

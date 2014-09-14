@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	defaultConfig = AkadokConfig{
+	defaultConfig = DeimosConfig{
 		Name:           "Deimos server",
 		Host:           net.IPv4(0, 0, 0, 0),
 		Port:           1518,
