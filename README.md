@@ -1,13 +1,12 @@
 Deimos-server is the game server for [Deimos](http://deimos-ga.me).
 
-[![wercker status](https://app.wercker.com/status/e7447bbc8dba0abab17c9a30dd64ff05/m/ "wercker status")](https://app.wercker.com/project/bykey/e7447bbc8dba0abab17c9a30dd64ff05)
+[![wercker status](https://app.wercker.com/status/d168629e0261b5ce128e306d7549a941/m "wercker status")](https://app.wercker.com/project/bykey/d168629e0261b5ce128e306d7549a941)
 
 # Building
 
 The best way to build deimos-server for your system is to download the latest version of the [Go](http://golang.org) compiler. Then you just have to run the following commands in a terminal:
 
     go get github.com/deimosgame/deimos-server
-    go install github.com/deimosgame/deimos-server
 
 Deimos-server can now be ran using the `deimos-server` command. It will generate its default config file in its directory. You can edit it as you want.
 
@@ -17,7 +16,7 @@ Deimos-server is using multiple sub-packages to make its components modular. How
 
     go test ./...
 
-If you just want to measure the stability of deimos-server, you can rather check out our [Wercker project](https://app.wercker.com/project/bykey/e7447bbc8dba0abab17c9a30dd64ff05).
+If you just want to measure the stability of deimos-server, you can rather check out our [Wercker project](https://app.wercker.com/project/bykey/d168629e0261b5ce128e306d7549a94§1). Please note that we had to change the build system because of a few things, so the buid history is not complete at all.
 
 # Configuration
 
